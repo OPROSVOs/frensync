@@ -1,0 +1,53 @@
+[-
+
+$http_headers_out{'Access-Control-Allow-Origin'} = "https://boards.4chan.org";
+$http_headers_out{'Access-Control-Allow-Credentials'} = "true";
+$http_headers_out{'Access-Control-Allow-Headers'} = "x-requested-with, if-modified-since";
+$http_headers_out{'Content-Type'} = "text/JSON; charset=utf-8";
+$http_headers_out{'Server'} = "Apache/2.4.38";
+
+use DBIx::Recordset;
+use Data::Dumper;
+use JSON;
+use utf8;
+
+$thread     = %fdat{t};
+$post       = %fdat{p};
+$board      = %fdat{b};
+
+unless($thread and $board){
+  print OUT "not implemented";exit 1;
+}
+
+*set = DBIx::Recordset -> Search ({'!DataSource'           => 'dbi:mysql:'.$ENV{NS_DB_CONNECTION},
+                                     '!Table'              => 'sync',
+                                     '!WriteMode'          => 0,
+                                    }) ;
+
+$set -> Search ({t => $thread, b=> $board});
+
+my @out = ();
+
+while($rec = $set->Next()){
+        my $o;
+        $o->{n}=$rec->{u} if $rec->{u};
+        $o->{p}=$rec->{p} if $rec->{p};
+        $o->{s}=$rec->{s} if $rec->{s};
+        $o->{e}=$rec->{e} if $rec->{e};
+        $o->{e}="";
+        utf8::decode($o->{n});
+        push @out, \%{$o};
+}
+
+# DB layout:
+#                 '*FullNames' => [
+#                                   'sync.id',
+#                                   'sync.b',
+#                                   'sync.t', # t = thread in that case
+#                                    TODO: add trip to the DB
+#                                   'sync.p',
+#                                   'sync.u', #should be n
+#                                   'sync.s',
+#                                   'sync.e'
+
+-][+local $escmode = 0;encode_json(\@out)+]

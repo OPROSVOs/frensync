@@ -5,8 +5,10 @@ Copyright (C) OPROSVOs 2021
 The whole code is licensed as Creative Commons Attribution-NonCommercial-ShareAlike 3.0
 The client side contains code from Namesync and 4chanX of which the license is listed below.
 
+Sources / Thanks to:
+Tripcode UTF-8 implementation from NoneGiven/tripcode
 
-4chan X Name Sync
+4chan X Name Sync:
 Copyright (C) nokosage 2014
 Copyright (C) ihavenoface 2013-2014
 Copyright (C) milkytiptoe 2012-2014

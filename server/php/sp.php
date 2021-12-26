@@ -35,14 +35,21 @@ if(!isset($b) or strlen($b) > 5 or strlen($n) > 256 or strlen($s) > 128 or strle
 
 $name = explode('#', $n, 2);
 if($name[1]){
-
-        $salt = mb_substr($name[1] , 1) . "H"; // changed to mb_ because the normal substr breaks multibyte substring
-        // the php version of the perl implementation: tr/\x3A-\x40\x5B-\x60\x00-\x2D\x7B-\xFF/A-Ga-f./
-        // does the \x3A-\x40\x5B-\x60 part:
-        $salt = str_replace(str_split(':;<=>?@[\]^_`'), str_split('ABCDEFGabcdef'), $salt); // replace 0x3a (:) with A, replace 0x3b (;) with B and so on
-        // does explict the \x00-\x2D\x7B-\xFF => ,part:
-        $salt = preg_replace('/[^\.\/0123456789\:\;\<\=\>\?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\\\]\^\_\`abcdefghijklmnopqrstuvwxyz]/', '.', $salt); //replace everything else with a .  UNTESTED!
-        $name[0] .= "!" . substr(crypt($name[1], $salt), -10);
+    //Works with wide, non ASCII characters
+    $name[1] = htmlspecialchars($name[1]); 
+    $num_chars = iconv_strlen($name[1], "UTF-8");
+    $conv = "";
+    for ($i = 0; $i < $num_chars; $i++) {
+        try {
+            $conv .= iconv("UTF-8", "CP932", iconv_substr($name[1], $i, 1, "UTF-8"));
+        }
+        catch (Exception $ex) {
+            $conv .= "?";
+        }
+    }
+    $salt = strtr(preg_replace("/[^\.-z]/", ".", substr($conv . "H.", 1, 2)), ":;<=>?@[\\]^_`", "ABCDEFGabcdef");
+    $trip = substr(crypt($conv, $salt), -10);
+    $name[0] .= "!" . $trip;
 }
 
 $fname = "tmp/ns-$b-$t.json";

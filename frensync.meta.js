@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.0.1
+// @version      0.0.2
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync

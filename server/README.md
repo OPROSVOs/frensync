@@ -15,15 +15,7 @@ apt install libnet-server-perl libclass-dbi-mysql-perl libdbix-recordset-perl li
 ```
 
 MYSQL quick setup:
-```sql
-CREATE DATABASE ns;
-USE ns;
-CREATE TABLE s IF NOT EXISTS( p INT UNSIGNED NOT NULL PRIMARY KEY, t INT UNSIGNED NOT NULL, b ENUM('b', 'soc', 's4s', 'trash') NOT NULL, n VARCHAR(128) NULL, tr VARCHAR(64) NULL, s VARCHAR(128) NULL, e VARCHAR(128) NULL, dnt VARCHAR(2) NULL );
-SET GLOBAL general_log = 'OFF';
-CREATE USER 'ns'@'localhost' IDENTIFIED BY 'ns';
-GRANT ALL PRIVILEGES ON ns . * TO 'ns'@'localhost';
-FLUSH PRIVILEGES;
-```
+see db.sql
 
 Then set up apache2 and certbot, a2enmod php, a2ensite, etc
 

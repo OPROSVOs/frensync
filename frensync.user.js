@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.1.1
+// @version      0.1.2
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -28,11 +28,11 @@
 
   Set = {};
 
-  d = document;
+  d = document; 
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.1.0',
+    VERSION: '0.1.2',
     posts: {},
     threads: [],
     boards: ['b', 'trash'] // ['b', 'soc', 's4s', 'trash']
@@ -172,6 +172,13 @@
   $.set = function(name, value) {
     return localStorage.setItem("" + g.NAMESPACE + name, value);
   };
+  
+  $.calcColor = function(ch, ca){
+    if(Main.brightness == null){return "";}
+    if(ch == null || ch < 0 || ch > 360){ch=0;}
+    if(ch == null || ca < 0 || ca > 50 ){ca=0;}
+    return "hsl("+ch+", "+((Main.brightness>128)?(50+ parseInt(ca)):(33+ parseInt(ca)))+"%, "+((Main.brightness>128)?( parseInt(ca)):(100- parseInt(ca)))+"%)";
+  };
 
   Config = {
     main: {
@@ -278,12 +285,13 @@
             $('.post_author', post).title = ref[i].e;
           }
           if (typeof ref[i].t != null) {
-            $('.post_tripcode', post).title = ref[i].t;
+            $('.post_tripcode', post).textContent = ref[i].t;
           }
           if (typeof ref[i].ca != null && typeof ref[i].ch != null && ref[i].ca !== "" && ref[i].ch !== "" && ref[i].ca > 0) {
-            //debugger;
-            $('.post_tripcode', post).style.color="hsl("+parseInt(ref[i].ch||30)+", 100%, 50%)";
-            $('.post_author',   post).style.color="hsl("+parseInt(ref[i].ch||30)+", 100%, 50%)";
+            var str = $.calcColor(ref[i].ch, ref[i].ca);
+            console.log(str);
+            $('.post_tripcode', post).style.color=str;
+            $('.post_author',   post).style.color=str;
           }
         }
       }
@@ -314,8 +322,9 @@
         console.log("FS: We are running on an archive site - fetching names");
         NameFetch.init();
       }
+      Main.detectBgColor();
     },
-        init: function() {
+    init: function() {
       var lastView, path, ref;
       lastView = g.view;
       path = location.pathname.split('/');
@@ -339,6 +348,17 @@
     boardLegit: function() {
       var ref;
       return ref = g.board, indexOf.call(g.boards, ref) >= 0;
+    },
+    detectBgColor: function() {
+      var yiq = 225; //assume bright
+      try{
+        var rgb = window.getComputedStyle($('.reply')).getPropertyValue( "background-color" ) || "rgb(224,224,224)";
+            rgb = rgb.replace(/[^.\d\,]/g, '').split(',') //"rgb(214, 218, 240)" => 214, 218, 240
+            yiq = ((parseInt(rgb[0])*299)+(parseInt(rgb[1])*587)+(parseInt(rgb[2])*114))/1000;
+      }catch(e){console.log(e);}
+      console.log("brightness " + yiq);
+      Main.brightness = yiq;
+      return yiq;
     }
   };
   
@@ -426,7 +446,7 @@
         tripcode = oinfo.t;
         email = oinfo.e;
         subject = oinfo.s;
-        ca = parseInt(oinfo.ca) / 100 || 0;
+        ca = parseInt(oinfo.ca) || 0;
         ch = parseInt(oinfo.ch) || 0;
       }
       if (Set['Custom Names'] && uID !== 'Heaven' && $('.sync-custom', this.nodes.info) === null) {
@@ -492,8 +512,9 @@
         $.rm(tripspan);
       }
       if(ca && ch){
-          if (tripspan){tripspan.style.color="hsl("+ch+", 100%, 50%)";}
-          if (namespan){namespan.style.color="hsl("+ch+", 100%, 50%)";}
+          var str = $.calcColor(ch, ca);
+          if (tripspan){tripspan.style.color=str;}
+          if (namespan){namespan.style.color=str;}
       }
       if (Set['Mark Sync Posts'] && this.isReply && Posts.nameByPost[this.ID]) {
         $.addClass(this.nodes.post, 'sync-post');
@@ -573,8 +594,8 @@
     	<input type=text name=Email placeholder=Email>
     	<input type=text name=Subject placeholder=Subject>		
       <input type=text name=ColorPreview value='Color:' placeholder='color:' readonly=readonly style='width:35px;border:0'>
-		  <input type=number name=ColorAmount placeholder=0 value=0 min=0 max=1 step=1 style='width:50px'  title='Enable or disable; TODO: use saturation'>
-		  <input type=number name=ColorHue placeholder=0 value=0 min=0 max=360 step=10 style='width:50px' title='Hue'>
+		  <input type=number name=ColorAmount placeholder=0 value=0 min=0 max=50 step=1 style='width:50px'  title='How much color shall it be (0-50)? Depends on dark/bright theme'>
+		  <input type=number name=ColorHue placeholder=0 value=0 min=0 max=360 step=10 style='width:50px' title='Hue (0-360)'>
   </div>
 </fieldset>
 <fieldset>
@@ -668,8 +689,8 @@
       var colorHue=    $('input[Name=ColorHue]',     section);
 
       var changer= function(e) {
-        if(colorAmount.value == 1){
-          colorPreview.style.backgroundColor="hsl("+colorHue.value+", 100%, 50%)";
+        if(colorAmount.value >= 1){
+          colorPreview.style.backgroundColor= $.calcColor(colorHue.value, colorAmount.value);
         }else{
           colorPreview.style.backgroundColor="";
         }
@@ -756,6 +777,7 @@
 				  // console.log(e); //error expected
 				  return;
 			  }
+        Main.detectBgColor();
 			  for (i = 0, len = ref.length; i < len; i++) {
           poster = ref[i];
           Posts.nameByPost[poster.p] = poster;

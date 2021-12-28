@@ -3,7 +3,8 @@ The userscript to sync additional fields on 4chan.
 Depends on 4chanX on 4chan.
 
 The idea is to implement this like Namesync but with a redundant multi master server aswell as posting to the original Namesync.
-And have the server side implementation open source so the project doesn't die.
+And having the server side implementation open source so the project doesn't die.
+Currently Namesync is down because the server is returning an error and this one is providing a different backend in the meantime and later on.
 
 The second goal is to provide a broader interface:
 A TripFagFinder like interface to find active threads
@@ -26,6 +27,9 @@ Installing:
 
 Currently working server:
 * wide characters in tripcode supported
+
+Todos server:
+* Correct the tripcode saving: save it as its own field
 
 Currently working client:
 * Updates work / tested

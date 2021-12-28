@@ -16,7 +16,7 @@ Installing:
 * If you don't have an user script extension like Greasemonkey, etc. get ViolentMonkey [(Firefox)](https://addons.mozilla.org/de/firefox/addon/violentmonkey/) or [(Chrome)](https://chrome.google.com/webstore/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag)
 * Install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) which includes Namesync
 * Optional: install PersonaPlus
-* Optional: install OneeChan (untested)
+* Optional: install OneeChan (works, tested by BCBoi)
 * Optional: install TripfagFinder (broken?)
 * No uBlock or Adblock rule update required if it has been previously set up
 * For a first setup continue [here](https://susanqt.github.io) after the Namesync section 

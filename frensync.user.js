@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.1.0
+// @version      0.1.1
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -280,9 +280,10 @@
           if (typeof ref[i].t != null) {
             $('.post_tripcode', post).title = ref[i].t;
           }
-          if (typeof ref[i].ca != null && typeof ref[i].ch != null) {
-            $('.post_tripcode', post).style.backgroundColor="hsla("+parseInt(colorHue.value)+", 100%, 50%, "+(parseInt(colorAmount.value))/100+")";
-            $('.post_author',   post).style.backgroundColor="hsla("+parseInt(colorHue.value)+", 100%, 50%, "+(parseInt(colorAmount.value))/100+")";
+          if (typeof ref[i].ca != null && typeof ref[i].ch != null && ref[i].ca !== "" && ref[i].ch !== "" && ref[i].ca > 0) {
+            //debugger;
+            $('.post_tripcode', post).style.color="hsl("+parseInt(ref[i].ch||30)+", 100%, 50%)";
+            $('.post_author',   post).style.color="hsl("+parseInt(ref[i].ch||30)+", 100%, 50%)";
           }
         }
       }
@@ -491,8 +492,8 @@
         $.rm(tripspan);
       }
       if(ca && ch){
-          if (tripspan){tripspan.style.color="hsla("+ch+", 100%, 50%, "+ca+")";}
-          if (namespan){namespan.style.color="hsla("+ch+", 100%, 50%, "+ca+")";}
+          if (tripspan){tripspan.style.color="hsl("+ch+", 100%, 50%)";}
+          if (namespan){namespan.style.color="hsl("+ch+", 100%, 50%)";}
       }
       if (Set['Mark Sync Posts'] && this.isReply && Posts.nameByPost[this.ID]) {
         $.addClass(this.nodes.post, 'sync-post');
@@ -572,7 +573,7 @@
     	<input type=text name=Email placeholder=Email>
     	<input type=text name=Subject placeholder=Subject>		
       <input type=text name=ColorPreview value='Color:' placeholder='color:' readonly=readonly style='width:35px;border:0'>
-		  <input type=number name=ColorAmount placeholder=0 value=0 min=0 max=100 step=10 style='width:50px'  title='Transparency from white/black'>
+		  <input type=number name=ColorAmount placeholder=0 value=0 min=0 max=1 step=1 style='width:50px'  title='Enable or disable; TODO: use saturation'>
 		  <input type=number name=ColorHue placeholder=0 value=0 min=0 max=360 step=10 style='width:50px' title='Hue'>
   </div>
 </fieldset>
@@ -666,7 +667,14 @@
       var colorAmount= $('input[Name=ColorAmount]',  section);
       var colorHue=    $('input[Name=ColorHue]',     section);
 
-      var changer= function(e) {colorPreview.style.backgroundColor="hsla("+colorHue.value+", 100%, 50%, "+(colorAmount.value)/100+")";if(e==='change'){$.set('ca', colorAmount.value);$.set('ch', colorHue.value);}}
+      var changer= function(e) {
+        if(colorAmount.value == 1){
+          colorPreview.style.backgroundColor="hsl("+colorHue.value+", 100%, 50%)";
+        }else{
+          colorPreview.style.backgroundColor="";
+        }
+        if(e==='change'){$.set('ca', colorAmount.value);$.set('ch', colorHue.value);}
+      }
       $.on(colorAmount, 'change', changer);
       $.on(colorHue, 'change', changer);
       changer('dryrun');

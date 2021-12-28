@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.1.0
+// @version      0.1.1
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -32,7 +32,7 @@
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.1.0',
+    VERSION: '0.1.1',
     posts: {},
     threads: [],
     boards: ['b', 'trash'] // ['b', 'soc', 's4s', 'trash']
@@ -280,6 +280,10 @@
           if (typeof ref[i].t != null) {
             $('.post_tripcode', post).title = ref[i].t;
           }
+          if (typeof ref[i].ca != null && typeof ref[i].ch != null) {
+            $('.post_tripcode', post).style.backgroundColor="hsla("+parseInt(colorHue.value)+", 100%, 50%, "+(parseInt(colorAmount.value))/100+")";
+            $('.post_author',   post).style.backgroundColor="hsla("+parseInt(colorHue.value)+", 100%, 50%, "+(parseInt(colorAmount.value))/100+")";
+          }
         }
       }
       console.log('FS: Loaded');
@@ -407,7 +411,7 @@
       }
     },
     updatePost: function() {
-      var el, email, emailspan, info, linfo, name, namespan, obj, oinfo, regex, subject, subjectspan, tripcode, tripspan, type, uID;
+      var el, email, emailspan, info, linfo, name, namespan, obj, oinfo, regex, subject, ca, ch, subjectspan, tripcode, tripspan, type, uID;
       if (!this.info || this.info.capcode) {
         return;
       }
@@ -421,6 +425,8 @@
         tripcode = oinfo.t;
         email = oinfo.e;
         subject = oinfo.s;
+        ca = parseInt(oinfo.ca) / 100 || 0;
+        ch = parseInt(oinfo.ch) || 0;
       }
       if (Set['Custom Names'] && uID !== 'Heaven' && $('.sync-custom', this.nodes.info) === null) {
         el = $.el('a', {
@@ -483,6 +489,10 @@
       } else if (tripspan) {
         $.rm(tripspan.previousSibling);
         $.rm(tripspan);
+      }
+      if(ca && ch){
+          if (tripspan){tripspan.style.color="hsla("+ch+", 100%, 50%, "+ca+")";}
+          if (namespan){namespan.style.color="hsla("+ch+", 100%, 50%, "+ca+")";}
       }
       if (Set['Mark Sync Posts'] && this.isReply && Posts.nameByPost[this.ID]) {
         $.addClass(this.nodes.post, 'sync-post');
@@ -551,7 +561,62 @@
     },
     open: function(section) {
       var check, checked, field, i, istrue, j, len, len1, ref, ref1, ref2, setting, stored, text, val;
-      section.innerHTML = "<fieldset>\n  	<legend>\n    		<label><input type=checkbox name='Persona Fields' " + ($.get('Persona Fields') === 'true' ? 'checked' : '') + ">Persona</label>\n  	</legend>\n  <p>Share these fields instead of the 4chan X quick reply fields.</p>\n  <div>\n    	<input type=text name=Name placeholder=Name>\n    	<input type=text name=Email placeholder=Email>\n    	<input type=text name=Subject placeholder=Subject>\n  </div>\n</fieldset>\n<fieldset>\n  	<legend>\n    <label><input type=checkbox name=Filter " + ($.get('Filter') === 'true' ? 'checked' : '') + ">Filter</label>\n  	</legend>\n  <p><code>^(?!Anonymous$)</code> to filter all names <code>!tripcode|!tripcode</code> to filter multiple tripcodes. Only applies to sync posts.</p>\n  <div>\n    	<input type=text name=FilterNames placeholder=Names>\n    	<input type=text name=FilterTripcodes placeholder=Tripcodes>\n    	<input type=text name=FilterEmails placeholder=Email>\n    	<input type=text name=FilterSubjects placeholder=Subjects>\n  </div>\n</fieldset>\n<fieldset>\n  <legend>Advanced</legend>\n  <div>\n    	<input id=syncClear type=button value='Clear my sync history' title='Clear your sync history from the server'>\n    	Sync Delay: <input type=number name=Delay min=0 step=100 placeholder=300 title='Delay before synchronising after a thread or index update'> ms\n   	</div>\n</fieldset>\n<fieldset>\n  	<legend>About</legend>\n  	<div>4chanX FrenSync v" + g.VERSION + "</div>\n  	<div>\n    		<a href='https://m8q16hakamiuv8ch.myfritz.net' target=_blank>Website</a> |\n    		<a href='https://github.com/OPROSVOs/frensync/wiki/Support' target=_blank>Support</a> |\n    		<a href='https://github.com/OPROSVOs/frensync/license' target=_blank>License</a> |\n      		<a href='https://github.com/OPROSVOs/frensync/issues/new' target=_blank>Issues</a>\n  	</div>\n<p></p>	<div>Based on 4chan X Name Sync v4.9.3</div>\n  	<div>\n    <a href='http://milkytiptoe.github.io/Name-Sync/' target=_blank>Website</a> |\n    		<a href='https://github.com/milkytiptoe/Name-Sync/wiki/Support' target=_blank>Support</a> |\n    		<a href='https://raw.githubusercontent.com/milkytiptoe/Name-Sync/master/license' target=_blank>License</a> |\n    		<a href='https://raw.githubusercontent.com/milkytiptoe/Name-Sync/master/changelog' target=_blank>Changelog</a> |\n    		<a href='https://github.com/milkytiptoe/Name-Sync/issues/new' target=_blank>Issues</a>\n  	</div>\n</fieldset>";
+      //section.innerHTML = "<fieldset>\n  	<legend>\n    		<label><input type=checkbox name='Persona Fields' " + ($.get('Persona Fields') === 'true' ? 'checked' : '') + ">Persona</label>\n  	</legend>\n  <p>Share these fields instead of the 4chan X quick reply fields.</p>\n  <div>\n    	<input type=text name=Name placeholder=Name>\n    	<input type=text name=Email placeholder=Email>\n    	<input type=text name=Subject placeholder=Subject>\n  </div>\n</fieldset>\n<fieldset>\n  	<legend>\n    <label><input type=checkbox name=Filter " + ($.get('Filter') === 'true' ? 'checked' : '') + ">Filter</label>\n  	</legend>\n  <p><code>^(?!Anonymous$)</code> to filter all names <code>!tripcode|!tripcode</code> to filter multiple tripcodes. Only applies to sync posts.</p>\n  <div>\n    	<input type=text name=FilterNames placeholder=Names>\n    	<input type=text name=FilterTripcodes placeholder=Tripcodes>\n    	<input type=text name=FilterEmails placeholder=Email>\n    	<input type=text name=FilterSubjects placeholder=Subjects>\n  </div>\n</fieldset>\n<fieldset>\n  <legend>Advanced</legend>\n  <div>\n    	<input id=syncClear type=button value='Clear my sync history' title='Clear your sync history from the server'>\n    	Sync Delay: <input type=number name=Delay min=0 step=100 placeholder=300 title='Delay before synchronising after a thread or index update'> ms\n   	</div>\n</fieldset>\n<fieldset>\n  	<legend>About</legend>\n  	<div>4chanX FrenSync v" + g.VERSION + "</div>\n  	<div>\n    		<a href='https://m8q16hakamiuv8ch.myfritz.net' target=_blank>Website</a> |\n    		<a href='https://github.com/OPROSVOs/frensync/wiki/Support' target=_blank>Support</a> |\n    		<a href='https://github.com/OPROSVOs/frensync/license' target=_blank>License</a> |\n      		<a href='https://github.com/OPROSVOs/frensync/issues/new' target=_blank>Issues</a>\n  	</div>\n<p></p>	<div>Based on 4chan X Name Sync v4.9.3</div>\n  	<div>\n    <a href='http://milkytiptoe.github.io/Name-Sync/' target=_blank>Website</a> |\n    		<a href='https://github.com/milkytiptoe/Name-Sync/wiki/Support' target=_blank>Support</a> |\n    		<a href='https://raw.githubusercontent.com/milkytiptoe/Name-Sync/master/license' target=_blank>License</a> |\n    		<a href='https://raw.githubusercontent.com/milkytiptoe/Name-Sync/master/changelog' target=_blank>Changelog</a> |\n    		<a href='https://github.com/milkytiptoe/Name-Sync/issues/new' target=_blank>Issues</a>\n  	</div>\n</fieldset>";
+      section.innerHTML = `<fieldset>
+  	<legend>
+    		<label><input type=checkbox name='Persona Fields' ` + ($.get('Persona Fields') === 'true' ? 'checked' : '') + `>Persona</label>
+  	</legend>
+  <p>Share these fields instead of the 4chan X quick reply fields.</p>
+  <div>
+    	<input type=text name=Name placeholder=Name>
+    	<input type=text name=Email placeholder=Email>
+    	<input type=text name=Subject placeholder=Subject>		
+      <input type=text name=ColorPreview value='Color:' placeholder='color:' readonly=readonly style='width:35px;border:0'>
+		  <input type=number name=ColorAmount placeholder=0 value=0 min=0 max=100 step=10 style='width:50px'  title='Transparency from white/black'>
+		  <input type=number name=ColorHue placeholder=0 value=0 min=0 max=360 step=10 style='width:50px' title='Hue'>
+  </div>
+</fieldset>
+<fieldset>
+  	<legend>
+    <label><input type=checkbox name=Filter ` + ($.get('Filter') === 'true' ? 'checked' : '') + `>Filter</label>
+  	</legend>
+  <p><code>^(?!Anonymous$)</code> to filter all names <code>!tripcode|!tripcode</code> to filter multiple tripcodes. Only applies to sync posts.</p>
+  <div>
+    	<input type=text name=FilterNames placeholder=Names>
+    	<input type=text name=FilterTripcodes placeholder=Tripcodes>
+    	<input type=text name=FilterEmails placeholder=Email>
+    	<input type=text name=FilterSubjects placeholder=Subjects>
+  </div>
+</fieldset>
+<fieldset>
+  <legend>Advanced</legend>
+  <div>
+    	<input id=syncImport type=button value='Import form Namesync' title='Import name and settings from NS'>
+    	<input id=syncClear type=button value='Clear my sync history' title='Clear your sync history from the server'>
+    	Sync Delay: <input type=number name=Delay min=0 step=100 placeholder=300 title='Delay before synchronising after a thread or index update'> ms
+   	</div>
+</fieldset>
+<fieldset>
+  	<legend>About</legend>
+  	<div>4chanX FrenSync v `+ g.VERSION + `</div>
+  	<div>
+    		<a href='https://m8q16hakamiuv8ch.myfritz.net' target=_blank>Website</a> |
+    		<a href='https://github.com/OPROSVOs/frensync/wiki/Support' target=_blank>Support</a> |
+    		<a href='https://github.com/OPROSVOs/frensync/license' target=_blank>License</a> |
+      		<a href='https://github.com/OPROSVOs/frensync/issues/new' target=_blank>Issues</a>
+  	</div>
+<p></p>	<div>Based on 4chan X Name Sync v4.9.3</div>
+  	<div>
+    <a href='http://milkytiptoe.github.io/Name-Sync/' target=_blank>Website</a> |
+    		<a href='https://github.com/milkytiptoe/Name-Sync/wiki/Support' target=_blank>Support</a> |
+    		<a href='https://raw.githubusercontent.com/milkytiptoe/Name-Sync/master/license' target=_blank>License</a> |
+    		<a href='https://raw.githubusercontent.com/milkytiptoe/Name-Sync/master/changelog' target=_blank>Changelog</a> |
+    		<a href='https://github.com/milkytiptoe/Name-Sync/issues/new' target=_blank>Issues</a>
+  	</div>
+</fieldset>
+      `;
+      
+
       
       
       field = $.el('fieldset');
@@ -594,7 +659,18 @@
           return $.set(this.name, this.value);
         });
       }
-      $.on($('#syncClear', section), 'click', Sync.clear);
+      $.on($('#syncClear', section), 'click', Sync.clear);//TODO
+      $.on($('#syncImport', section), 'click', Sync.import);
+      
+      var colorPreview=$('input[Name=ColorPreview]', section);
+      var colorAmount= $('input[Name=ColorAmount]',  section);
+      var colorHue=    $('input[Name=ColorHue]',     section);
+
+      var changer= function(e) {colorPreview.style.backgroundColor="hsla("+colorHue.value+", 100%, 50%, "+(colorAmount.value)/100+")";if(e==='change'){$.set('ca', colorAmount.value);$.set('ch', colorHue.value);}}
+      $.on(colorAmount, 'change', changer);
+      $.on(colorHue, 'change', changer);
+      changer('dryrun');
+      
       return $('div[id$="x-settings"] nav').style.visibility = 'hidden';
     }
   };
@@ -673,8 +749,8 @@
 				  return;
 			  }
 			  for (i = 0, len = ref.length; i < len; i++) {
-				poster = ref[i];
-				Posts.nameByPost[poster.p] = poster;
+          poster = ref[i];
+          Posts.nameByPost[poster.p] = poster;
 			  }
 			  Posts.updateAllPosts();
 			  return $.event('NamesSynced');
@@ -726,7 +802,7 @@
 	  var r;
 	  this.NSserver = (parseInt($.get('NSserver'))) || 'namesync.net,m8q16hakamiuv8ch.myfritz.net';
 	  this.NSserver.split(',').forEach(function(server){
-        var r = $.ajax(server, 'sp', 'POST', "p=" + postID + "&t=" + threadID + "&b=" + g.board + "&n=" + (encodeURIComponent(name)) + "&s=" + (encodeURIComponent(subject)) + "&e=" + (encodeURIComponent(email)) + "&dnt=" + (Set['Do Not Track'] ? '1' : '0'), {
+        var r = $.ajax(server, 'sp', 'POST', "p=" + postID + "&t=" + threadID + "&b=" + g.board + "&n=" + (encodeURIComponent(name)) + "&s=" + (encodeURIComponent(subject)) + "&e=" + (encodeURIComponent(email)) + "&dnt=" + (Set['Do Not Track'] ? '1' : '0') + "&ca=" + parseInt($.get("ColorAmount"))+ "&ch=" + parseInt($.get("ColorHue")), {
 			onerror: function() {
 			  if (!Sync.canRetry) {
 				return;
@@ -759,6 +835,11 @@
 	  return r; /*return any; its async anyway*/
     },
     clear: function() {
+      
+      
+      alert("To be implemented");//TODO
+      
+      
       $('#syncClear').disabled = true;
 	  this.NSserver = (parseInt($.get('NSserver'))) || 'namesync.net,m8q16hakamiuv8ch.myfritz.net';
 	  this.NSserver.split(',').forEach(function(server){
@@ -774,6 +855,13 @@
 			}
 		  });
 	  });
+    },
+    import: function() {
+      
+      
+      alert("To be implemented");//TODO
+      
+      
     }
   };
   

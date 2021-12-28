@@ -14,7 +14,7 @@ Installing:
 * Backup your persona
 * Disable every ns script OR extension that ran earlier; check that only 4chanX is active
 * If you don't have an user script extension like Greasemonkey, etc. get ViolentMonkey [(Firefox)](https://addons.mozilla.org/de/firefox/addon/violentmonkey/) or [(Chrome)](https://chrome.google.com/webstore/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag)
-* Install [frensync.user.js](https://github.com/OPROSVOs/frensync/blob/main/frensync.user.js) which includes Namesync
+* Install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) which includes Namesync
 * Optional: install PersonaPlus
 * Optional: install OneeChan (untested)
 * Optional: install TripfagFinder (broken?)
@@ -30,11 +30,11 @@ Currently working server:
 Currently working client:
 * Updates work / tested
 * Name lookup in the archives works 100% on single server
+* Sends/receives both to/from Namesync and the backup in a crude way
 
 Todos client:
 * Detect multi instances 
 * Implement multi server in the archive lookup (basic work done)
-* Merge with NS (done)
 * Do a proper multi server implement.
 
 

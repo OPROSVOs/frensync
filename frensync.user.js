@@ -356,7 +356,7 @@
             rgb = rgb.replace(/[^.\d\,]/g, '').split(',') //"rgb(214, 218, 240)" => 214, 218, 240
             yiq = ((parseInt(rgb[0])*299)+(parseInt(rgb[1])*587)+(parseInt(rgb[2])*114))/1000;
       }catch(e){console.log(e);}
-      console.log("brightness " + yiq);
+      //console.log("brightness " + yiq);
       Main.brightness = yiq;
       return yiq;
     }

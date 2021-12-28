@@ -14,7 +14,8 @@ CREATE TABLE `s` (
   `dnt` varchar(1) DEFAULT NULL,
   `ch` smallint DEFAULT NULL,
   `ca` smallint DEFAULT NULL,
-  PRIMARY KEY (`p`)
+  PRIMARY KEY (`t`),
+  UNIQUE (`p`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

@@ -1,9 +1,9 @@
 Step by step guide:
 
 Installing **without** any previous setup:
-* If you don't have an user script extension like Greasemonkey, etc. get ViolentMonkey for [(Firefox)](https://addons.mozilla.org/de/firefox/addon/violentmonkey/) or [(Chrome)](https://chrome.google.com/webstore/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag)
-* If you don' have 4chanX, get it here: [4chanX.user.js](https://www.4chan-x.net/builds/4chan-X.user.js)
-* Install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) which includes Namesync
+* If you don't have an userscript extension like Greasemonkey or Tapermonkey. Get ViolentMonkey for [(Firefox)](https://addons.mozilla.org/de/firefox/addon/violentmonkey/) or [(Chrome)](https://chrome.google.com/webstore/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag) because ViolentMonkey is not properitary and doesn't use analytics / telemetry. But any userscript extension with the GM API should work.
+* Install [4chanX.user.js](https://www.4chan-x.net/builds/4chan-X.user.js) if you don't already have it
+* Install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) which includes Namesync functionality
 
 Installing **with** previous NS:
 * Backup your persona if you had one
@@ -30,3 +30,17 @@ Optional steps:
 ```
 * Optional: get a tripcode with your name which makes stealing your name harder. [Meriken's Tripcode Engine](https://github.com/meriken/merikens-tripcode-engine-v3) is currently the best.
 * Head to 4chan and set 4chanX up and Namesync/Frensync with your persona (settings:in the top right) and have fun.
+
+FAQ / Debugging:
+Q: There is an NS and FS in the corner OR there are multible NS running
+A: You have multible instances running. Remove every Namesync or Frensync userscript AND check your extensions. Then verify its gone and install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) once
+
+Q: Somebody gave me a link to an old version and features are missing / its buggy.
+A: Delete this userscript, ignore it and start from the top of this document.
+
+Q: It is visually glitching and toggling between names
+A: You probably run an outdated/standalone version. Update it.
+
+Currently no support for:
+The standalone browser extension (FF) (CR)
+The iOS Webhub

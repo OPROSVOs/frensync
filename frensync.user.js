@@ -177,7 +177,7 @@
     if(Main.brightness == null){return "";}
     if(ch == null || ch < 0 || ch > 360){ch=0;}
     if(ch == null || ca < 0 || ca > 50 ){ca=0;}
-    return "hsl("+ch+", "+((Main.brightness>128)?(50+ parseInt(ca)):(33+ parseInt(ca)))+"%, "+((Main.brightness>128)?(parseInt(ca/2)):(100- parseInt(ca)))+"%)";
+    return "hsl("+ch+", "+((Main.brightness>128)?(50+ parseInt(ca)):(50+ parseInt(ca)))+"%, "+((Main.brightness>128)?(parseInt(ca/2)):(100- parseInt(ca/1.5)))+"%)";
   };
 
   Config = {

@@ -32,15 +32,18 @@ Optional steps:
 * Head to 4chan and set 4chanX up and Namesync/Frensync with your persona (settings:in the top right) and have fun.
 
 FAQ / Debugging:
+
 Q: There is an NS and FS in the corner OR there are multible NS running
 A: You have multible instances running. Remove every Namesync or Frensync userscript AND check your extensions. Then verify its gone and install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) once
+
 
 Q: Somebody gave me a link to an old version and features are missing / its buggy.
 A: Delete this userscript, ignore it and start from the top of this document.
 
-Q: It is visually glitching and toggling between names
-A: You probably run an outdated/standalone version. Update it.
+
 
 Currently no support for:
+
 The standalone browser extension (FF) (CR)
+
 The iOS Webhub

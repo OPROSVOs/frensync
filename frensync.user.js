@@ -177,20 +177,24 @@
     if(Main.brightness == null){return "";}
     if(ch == null || ch < 0 || ch > 360){ch=0;}
     if(ch == null || ca < 0 || ca > 50 ){ca=0;}
-    return "hsl("+ch+", "+((Main.brightness>128)?(50+ parseInt(ca)):(33+ parseInt(ca)))+"%, "+((Main.brightness>128)?( parseInt(ca)):(100- parseInt(ca)))+"%)";
+    return "hsl("+ch+", "+((Main.brightness>128)?(50+ parseInt(ca)):(33+ parseInt(ca)))+"%, "+((Main.brightness>128)?(parseInt(ca/2)):(100- parseInt(ca)))+"%)";
   };
 
   Config = {
     main: {
       'Sync on /b/': [true, 'Enable sync on /b/.'],
-      'Sync on /soc/': [true, 'Enable sync on /soc/.'],
-      'Sync on /s4s/': [true, 'Enable sync on /s4s/.'],
+      'Sync on /soc/': [true, 'Enable sync on /soc/. (Disabled)'],
+      'Sync on /s4s/': [true, 'Enable sync on /s4s/. (Disabled)'],
       'Sync on /trash/': [true, 'Enable sync on /trash/.'],
       'Custom Names': [false, 'Posters can be given custom names.'],
-      'Read-only Mode': [false, 'Share none of your sync fields.'],
+      'Read-only Mode': [false, 'Share none of your sync fields (reload after change).'],
       'Hide Sage': [false, 'Share none of your sync fields when sage is in the email field.'],
       'Mark Sync Posts': [false, 'Mark posts made by sync users.'],
-      'Do Not Track': [false, 'Request no sync field tracking by third party archives.']
+      'Do Not Track': [false, 'Request no sync field tracking by third party archives.'],
+      'Do Not Track TFF': [false, 'Request to not show fields in a manner that shows what thread is active.'],
+      'Do Not Track Alzheimer': [true, 'Request name data to be forgotten some days after. (NS keeps data)'],
+      'Colors': [true, 'Show name colors when available.'],
+      'Smart email': [true, 'Try to find out what content in in there if its not an email (discord, links).'],
     },
     other: {
       'Persona Fields': [false],
@@ -201,7 +205,7 @@
   CSS = {
     init: function() {
       var css;
-      css = ".section-name-sync input[type='text'] {\n  border: 1px solid #CCC;\n  width: 148px;\n  padding: 2px;\n}\n.section-name-sync input[type='button'] {\n  padding: 3px;\n  margin-bottom: 6px;\n}\n.section-name-sync p {\n  margin: 0 0 8px 0;\n}\n.section-name-sync ul {\n  list-style: none;\n  margin: 0;\n  padding: 8px;\n}\n.section-name-sync div label {\n  text-decoration: underline;\n}\n/* Appchan X description fix */\n.section-name-sync .description {\n  display: inline;\n}\n/* ccd0 4chan X clear fix */\n.section-name-sync {\n  clear: both;\n}\n/* Show sync fields in ccd0 4chan X */\n#qr.sync-enabled .persona input {\n  display: inline-block !important;\n}";
+      css = ".section-name-sync input[type='text'] {\n  border: 1px solid #CCC;\n  width: 148px;\n  padding: 2px;\n}\n.section-name-sync input[type='button'] {\n  padding: 3px;\n  margin-bottom: 6px;\n}\n.section-name-sync p {\n  margin: 0 0 8px 0;\n}\n.section-name-sync ul {\n  list-style: none;\n  margin: 0;\n  padding: 8px;\n}\n.section-name-sync div label {\n  text-decoration: underline;\n}\n/* Appchan X description fix */\n.section-name-sync .description {\n  display: inline;\n}\n/* ccd0 4chan X clear fix */\n.section-name-sync {\n  clear: both;\n}\n/* Show sync fields in ccd0 4chan X */\n#qr.sync-enabled .persona input {\n  display: inline-block !important;\n}\n.section-name-sync {\n  overflow-y:scroll;\n}\n";
       if (Set['Filter']) {
         css += ".sync-filtered {\n  display: none !important;\n}";
       }
@@ -234,38 +238,28 @@
         console.log(threadNodes);
         throw "FS: Could not find thread / board";
       }
-      NameFetch.query("m8q16hakamiuv8ch.myfritz.net");
-      
-      
+      NameFetch.query("namesync.net", function(){
+        console.log('FS: Retrying');
+        NameFetch.query("m8q16hakamiuv8ch.myfritz.net", function(){console.log('FS: giving up');});
+      });
     },
-    query: function(server) {
+    query: function(server,  errCall) {
       return GM_xmlhttpRequest({
         url:"https://"+server+"/namesync/qp.php" + "?" + "t=" + this.thread + "&b=" + this.board, 
         method:'GET', 
-        headers:{'X-Requested-With':'frensync'}, //won't work without the x-requested-with header
+        headers:{'X-Requested-With':'NameSync4.9.3-frensync'+g.VERSION+'-archive'},
         overrideMimeType:'application/json',
         responseType: 'json',
         timeout: 15000,
         anonymous: true,
         onload: function(msg){
-           var ref;
-            if(msg.status == 200 && msg.responseText && msg.responseText.length){
-              try{
-                ref = JSON.parse(msg.responseText);
-              }catch(e){
-                console.log("FS: invalid json", e);
-              }
-              if(ref){
-                console.log('FS: Got an answer', ref);
-                NameFetch.contentHandle(ref);
-              }          
-           }else{
-            console.log('FS: No content', msg);
-           }  
+             var ref;
+             if(msg.status == 200 && msg.responseText && msg.responseText.length){
+                try{ref = JSON.parse(msg.responseText);}catch(e){console.log("FS: invalid json", e);errCall()}
+                if(ref){NameFetch.contentHandle(ref);console.log('FS: Success');}          
+             }
           },
-          onerror: function(msg){
-            console.log('FS: Got an error', msg);
-          }
+          onerror: function(msg){console.log('FS: Got an error', msg);errCall()}
       })
     },
     contentHandle: function(ref){ 
@@ -295,31 +289,17 @@
           }
         }
       }
-      console.log('FS: Loaded');
-      this.done = true;
     }
-      
-    
   };
   
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   
   
   
   Main = {
     DOMinit: function() {
-      //console.log("DOMinit fired",  Date.now() );
       if(window.location.href.indexOf("archived.moe") !== -1 || window.location.href.indexOf("desuarchive.org") !== -1){
-        console.log("FS: We are running on an archive site - fetching names");
         NameFetch.init();
       }
       Main.detectBgColor();
@@ -356,24 +336,26 @@
             rgb = rgb.replace(/[^.\d\,]/g, '').split(',') //"rgb(214, 218, 240)" => 214, 218, 240
             yiq = ((parseInt(rgb[0])*299)+(parseInt(rgb[1])*587)+(parseInt(rgb[2])*114))/1000;
       }catch(e){console.log(e);}
-      //console.log("brightness " + yiq);
       Main.brightness = yiq;
       return yiq;
+    },    
+    handleEmailLink: function(str) {
+      if(str.match(/^(https?|ftp):\/\/[^\s\/$.?#].[^\s]*$/i) == null){//assume not a link
+        if(str.match(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/) !== null){ //assume email
+          return 'mailto:' + str;
+        }else{// its not a link and not an email
+          if(str.match(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/i) !== null){//phone number...
+            return 'tel:' + str;
+          }//do nothing. cant differentiate between telegram and twitter and discord only supports invites
+        }
+      }
+      return str; //do nothing if its already a link
     }
   };
   
   
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   
   
     Posts = {
@@ -492,7 +474,7 @@
           $.after(namespan, $.tn(' '));
           $.add(emailspan, tripspan);
         }
-        emailspan.href = "mailto:" + email;
+        emailspan.href = Main.handleEmailLink(email);
       } else if (emailspan) {
         $.before(emailspan, namespan);
         $.rm(emailspan);
@@ -681,25 +663,18 @@
           return $.set(this.name, this.value);
         });
       }
-      $.on($('#syncClear', section), 'click', Sync.clear);//TODO
+      $.on($('#syncClear',  section), 'click', Sync.clear);//TODO
       $.on($('#syncImport', section), 'click', Sync.import);
-      
-      var colorPreview=$('input[Name=ColorPreview]', section);
-      var colorAmount= $('input[Name=ColorAmount]',  section);
-      var colorHue=    $('input[Name=ColorHue]',     section);
-
-      var changer= function(e) {
-        if(colorAmount.value >= 1){
-          colorPreview.style.backgroundColor= $.calcColor(colorHue.value, colorAmount.value);
-        }else{
-          colorPreview.style.backgroundColor="";
-        }
-        if(e==='change'){$.set('ca', colorAmount.value);$.set('ch', colorHue.value);}
+      var pr=$('input[Name=ColorPreview]', section);
+      var ca=$('input[Name=ColorAmount]',  section);
+      var ch=$('input[Name=ColorHue]',     section);
+      var c= function(e) {
+        pr.style.backgroundColor=((1<=ca.value)?($.calcColor(ch.value,ca.value)):"");
+        if(e=='change'){$.set('ca', ca.value);$.set('ch', ch.value);}
       }
-      $.on(colorAmount, 'change', changer);
-      $.on(colorHue, 'change', changer);
-      changer('dryrun');
-      
+      $.on(ca, 'change', c);
+      $.on(ch, 'change', c);
+      c('');
       return $('div[id$="x-settings"] nav').style.visibility = 'hidden';
     }
   };

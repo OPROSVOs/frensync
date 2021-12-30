@@ -9,6 +9,7 @@ Installing **with** previous NS:
 * Backup your persona if you had one
 * No uBlock or Adblock rule update required if it has been previously set up
 * Disable every NS script **OR** extension that ran earlier and check that **only** 4chanX is active
+* That earlier version on the m8b16... site is dead - delete it.
 * Install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) which includes Namesync
 
 

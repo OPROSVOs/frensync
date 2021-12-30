@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.1.2
+// @version      0.1.3
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -32,7 +32,7 @@
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.1.2',
+    VERSION: '0.1.3',
     posts: {},
     threads: [],
     boards: ['b', 'trash'] // ['b', 'soc', 's4s', 'trash']

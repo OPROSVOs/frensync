@@ -17,7 +17,7 @@ Optional steps:
 * Optional: install [PersonaPlus](https://pastebin.com/3jHyZwF3) to switch between multible names / tripcodes
 * Optional: install [OneeChan](https://github.com/KevinParnell/OneeChan/raw/master/builds/OneeChan.user.js) (works, tested by BCBoi)
 * Optional: install [TripfagFinder](https://github.com/bstats/Tripfag-Finder/raw/master/Tripfag-Finder.user.js) (**broken?**)
-* Recommended: To get the original Namesync working with Adblockers like uBlock, add this to the exception if you don't already have it:
+* Recommended: To get the original Namesync working with Adblockers like uBlock, add this one time to your **My Filter** ruleset:
 ```
 @@||4chan.org^*$csp=default-src 'self' * data: 'unsafe-inline' 'unsafe-eval'
 @@||4channel.org^*$csp=default-src 'self' * data: 'unsafe-inline' 'unsafe-eval'

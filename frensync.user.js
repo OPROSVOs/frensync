@@ -192,7 +192,6 @@
       'Mark Sync Posts': [false, 'Mark posts made by sync users.'],
       'Do Not Track': [false, 'Request no sync field tracking by third party archives.'],
       'Do Not Track TFF': [false, 'Request to not show fields in a manner that shows what thread is active.'],
-      'Do Not Track Alzheimer': [true, 'Request name data to be forgotten some days after. (NS keeps data)'],
       'Colors': [true, 'Show name colors when available.'],
       'Smart email': [true, 'Try to find out what content in in there if its not an email (discord, links).'],
     },

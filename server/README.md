@@ -6,7 +6,7 @@ The php version is the active one.
 
 Setup for any Ubuntu or Debian based GNU-Linux for the php version:
 ```sh
-apt install apache2 php-mbstring php-mysql mysql-server certbot -y
+apt install apache2 php-mbstring libapache2-mod-qos php-mysql mysql-server certbot -y
 ```
 
 Setup for any Ubuntu or Debian based GNU-Linux for the perl version:

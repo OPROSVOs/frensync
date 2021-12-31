@@ -20,6 +20,7 @@ Currently working server:
 * wide characters in tripcode supported
 * flood protection, range check, QoS and Fail2Ban is set
 * tripcodes are correctly hashed saved as its own column
+* catalog syncing works as well
 
 Currently working client:
 * Updates work / tested
@@ -33,7 +34,6 @@ Todos:
 * Implement multi server and merge names
 * sp.php: Secure tripcodes (help welcome)
 * qp.php: Delete data after some time
-* qp.php: Handle multible threads in the t arg for syncing the catalog.
 
 
 

@@ -32,6 +32,7 @@ Currently working client:
 Todos:
 * Detect multi instances 
 * Implement multi server and merge names
+* Some settings don't apply without reloading after (read-only, persona), needs testing
 * sp.php: Secure tripcodes (help welcome)
 * qp.php: Delete data after some time
 

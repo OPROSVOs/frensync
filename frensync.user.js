@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.1.3
+// @version      0.1.4
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -32,7 +32,7 @@
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.1.3',
+    VERSION: '0.1.4',
     posts: {},
     threads: [],
     boards: ['b', 'trash'] // ['b', 'soc', 's4s', 'trash']
@@ -280,9 +280,9 @@
           if (typeof ref[i].t != null) {
             $('.post_tripcode', post).textContent = ref[i].t;
           }
-          if (typeof ref[i].ca != null && typeof ref[i].ch != null && ref[i].ca !== "" && ref[i].ch !== "" && ref[i].ca > 0) {
+          if (typeof ref[i].ca != null && typeof ref[i].ch != null && ref[i].ca !== "" && ref[i].ch !== "" && ref[i].ca > 0 && Set['Colors']) {
             var str = $.calcColor(ref[i].ch, ref[i].ca);
-            console.log(str);
+            //console.log(str);
             $('.post_tripcode', post).style.color=str;
             $('.post_author',   post).style.color=str;
           }
@@ -492,7 +492,7 @@
         $.rm(tripspan.previousSibling);
         $.rm(tripspan);
       }
-      if(ca && ch){
+      if(ca && ch && Set['Colors']){
           var str = $.calcColor(ch, ca);
           if (tripspan){tripspan.style.color=str;}
           if (namespan){namespan.style.color=str;}

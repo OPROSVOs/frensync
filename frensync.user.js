@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.1.4
+// @version      0.1.5
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -23,7 +23,7 @@
 // ==/UserScript==
 
 (function() {
-  var $, $$, CSS, Config, Filter, Main, Post, Posts, Set, Settings, Sync, d, g,
+  var $, $$, CSS, Config, Filter, Main, Post, Posts, Set, MasterServer, Settings, Sync, d, g,
     indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   Set = {};
@@ -32,7 +32,8 @@
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.1.4',
+    VERSION: '0.1.5',
+    MsApi: '1',
     posts: {},
     threads: [],
     boards: ['b', 'trash'] // ['b', 'soc', 's4s', 'trash']
@@ -136,7 +137,7 @@
 	  url += "?" + data;
 	}
 	r.open(type, url, true);
-	r.setRequestHeader('X-Requested-With', 'NameSync4.9.3-FrenSync'+g.VERSION);
+	r.setRequestHeader('X-Requested-With', 'NameSync4.9.3-FrenSync'+g.VERSION); // 	r.setRequestHeader('X-Requested-With', 'NameSync4.9.3-FrenSync'+g.VERSION);
 	if (file === 'qp') {
 	  r.setRequestHeader('If-Modified-Since', Sync.lastModified);
 	}
@@ -237,9 +238,10 @@
         console.log(threadNodes);
         throw "FS: Could not find thread / board";
       }
-      NameFetch.query("namesync.net", function(){
+
+      NameFetch.query(MasterServer.getServer(0), function(){
         console.log('FS: Retrying');
-        NameFetch.query("m8q16hakamiuv8ch.myfritz.net", function(){console.log('FS: giving up');});
+        NameFetch.query(MasterServer.getServer(1), function(){console.log('FS: giving up');});
       });
     },
     query: function(server,  errCall) {
@@ -299,6 +301,9 @@
   Main = {
     DOMinit: function() {
       if(window.location.href.indexOf("archived.moe") !== -1 || window.location.href.indexOf("desuarchive.org") !== -1){
+        try{
+          MasterServer.init();
+        }catch(e){console.log("Failed updating the server list", e);}
         NameFetch.init();
       }
       Main.detectBgColor();
@@ -320,6 +325,9 @@
         }
       }
       if (Set["Sync on /" + g.board + "/"] || lastView) {
+        try{
+          MasterServer.init();
+        }catch(e){console.log("Failed updating the server list", e);}
         Posts.init();
         return Sync.init();
       }
@@ -352,7 +360,127 @@
     }
   };
   
+
   
+    MasterServer = {
+      data:{},
+      init: function(){
+        //load from storage or fetch a fresh one, check updates
+        MasterServer.parse();
+        MasterServer.check();
+        //debugger;
+      },
+      parse: function(){
+        //load data to glob
+        MasterServer.data.done = false;
+        var sl = $.get("Serverlist");
+        var o;
+        if(typeof sl == undefined || sl == null || sl.length < 1){console.log("FS: Serverlist is empty!"); sl = MasterServer.saneDefaults(1);}
+        try{o = JSON.parse(sl)}catch(e){console.log("FS: crtitcal error: could not read the serverlist"); o = JSON.parse(MasterServer.saneDefaults(1)); }
+        MasterServer.data = o;
+        console.log("FS: MasterServer parsed:", o);
+        MasterServer.data.done = true;
+      },
+      saneDefaults: function(override){
+        var srv = $.get("Serverlist");
+        if(typeof srv == undefined || srv == null || srv.length < 1 || override == 1 ){ 
+          console.log("FS: Fallback to defaults");
+          var defaults = '{"server":[{"namesync.net":{"sp":true,"qp":true}},{"m8q16hakamiuv8ch.myfritz.net":{"sp":true,"qp":true}}],"revisit":43200}';
+          $.set("Serverlist", defaults);
+          $.set("Serverlist-last-check", "2");
+          return defaults;
+        }
+      },
+      check: function(){
+        //date compare, integry
+        var then = $.get("Serverlist-last-check");
+        var set = function(){$.set("Serverlist-last-check", (new Date().getTime())); then= new Date().getTime()}
+        var srv = $.get("Serverlist");
+        if(typeof srv == undefined || srv == null || srv.length < 1){MasterServer.saneDefaults(); MasterServer.query(); return;}
+        if(typeof then == undefined || then == null || then < 1){set(); return;}
+        var now = new Date().getTime();
+        var diff = (now - then) / 1000;
+        var recheck = MasterServer.data.revisit || '250000';
+        console.log("FS: recheck: ", recheck, (recheck-diff));
+        if(diff < 0){set(); return;}
+        if(diff > recheck){ 
+          console.log("FS: updating serverlist");
+          set();
+          MasterServer.query();
+        }else{
+          console.log("FS: serverlist probably up to date");
+        }
+      },
+      query: function(){
+        //get the data from github
+        console.log("FS: started the update");
+        return GM_xmlhttpRequest({
+          url:"https://raw.githubusercontent.com/OPROSVOs/frensync/main/server/list.json", 
+          method:'GET', 
+          overrideMimeType:'application/json',
+          responseType: 'json',
+          timeout: 30000,
+          anonymous: true,
+          onload: function(msg){
+               var ref;
+               if(msg.status == 200 && msg.responseText && msg.responseText.length){
+                  try{
+                    ref = JSON.parse(msg.responseText);
+                    if(ref && ref.api){ //verify that it is really valid json
+                      $.asap(function(){return (MasterServer.data.done != false)}, function(){$.set("Serverlist", JSON.stringify(ref));MasterServer.parse()});
+                      console.log('FS: update success');
+                    }
+                  }catch(e){console.log("FS: masterserver invalid json", e)}          
+               }else{console.log('FS: Error fetching the masterserver', msg)}
+            },
+            onerror: function(msg){console.log('FS: Error fetching the masterserver: XHR error', msg)}
+          });
+      },
+      getServer: function(i){
+        return Object.keys(MasterServer.data.server[i])[0];
+      },
+      getServerInfo: function(i){
+        return MasterServer.data.server[i][MasterServer.getServer(i)];
+      },
+      checkAvail: function(root){
+        var s   = function(txt, val, srv, i){
+            var p = $.el('p' , {id: 'availRoot'+i});
+            p.textContent = (val.name || srv) + ': ' + txt;
+            $.add(root, p);
+          };
+        var q = function(val, srv, i){
+           GM_xmlhttpRequest({
+            url:"https://"+srv+"/namesync/qp.php?b=b&t=42", 
+            method:'GET', 
+            headers:{'X-Requested-With':'NameSync4.9.3-frensync'+g.VERSION+'-check'},
+            overrideMimeType:'application/json',
+            responseType: 'json',
+            timeout: 8000,
+            anonymous: true,
+            onload: function(msg){
+               var ref;
+               console.log(msg.finalUrl, msg.status, msg.responseText.substring(0, 80));
+               if(msg.status == 200 && msg.responseText && msg.responseText.length && msg.responseText === "[]"){
+                 var l = msg.responseHeaders.split('\n').find(function(e,i,a){return (e.indexOf('X-LOAD') == 0)});
+                 if(typeof l != undefined && l != null && l.length > 0){l = l.substr(8);s(" ✅ online, working, load: " + l, val, srv, i);}else{s("online, working", val, srv, i);}
+               }else{s(" ❌ online, server returns an error", val, srv, i);}
+            },
+            onerror: function(msg){s(" ❌ offline", val, srv, i);}
+          });
+        };
+        if(typeof MasterServer.data.server == undefined || MasterServer.data.server == null){console.log("loading not done");return;}
+        var len, i;
+        for (i = 0, len = MasterServer.data.server.length; i < len; i++) {
+          var srv = MasterServer.getServer(i);
+          var val = MasterServer.getServerInfo(i);
+          try{
+            q(val, srv, i);
+          }catch(e){
+            s(" ❌ unknown error, check logs", val, srv, i);
+          }
+        }
+      }
+    };
   
 
   
@@ -592,9 +720,13 @@
   </div>
 </fieldset>
 <fieldset>
+  <legend>Current Server Status</legend>
+  <div id=availRoot>
+   	</div>
+</fieldset>
+<fieldset>
   <legend>Advanced</legend>
   <div>
-    	<input id=syncImport type=button value='Import form Namesync' title='Import name and settings from NS'>
     	<input id=syncClear type=button value='Clear my sync history' title='Clear your sync history from the server'>
     	Sync Delay: <input type=number name=Delay min=0 step=100 placeholder=300 title='Delay before synchronising after a thread or index update'> ms
    	</div>
@@ -662,8 +794,10 @@
           return $.set(this.name, this.value);
         });
       }
+      
+      MasterServer.checkAvail($('#availRoot',  section));
+      
       $.on($('#syncClear',  section), 'click', Sync.clear);//TODO
-      $.on($('#syncImport', section), 'click', Sync.import);
       var pr=$('input[Name=ColorPreview]', section);
       var ca=$('input[Name=ColorAmount]',  section);
       var ch=$('input[Name=ColorHue]',     section);
@@ -733,6 +867,50 @@
       if (g.threads.length === 0) {
         return;
       }
+      
+      
+      
+      
+      
+      var len, i;
+      for (i = 0, len = MasterServer.data.server.length; i < len; i++) {
+        var srv = MasterServer.getServer(i);
+        var val = MasterServer.getServerInfo(i);
+        if (val.qp === false) { continue; }
+        try{
+            //console.log(val, srv, i);
+          $.ajax(srv, 'qp', 'GET', "t=" + g.threads + "&b=" + g.board, {
+          onloadend: function() {
+            var i, len, poster, ref;
+            if (!(this.status === 200 && this.response)) {
+            return;
+            }
+            if (g.view === 'thread') {
+            Sync.lastModified = this.getResponseHeader('Last-Modified') || Sync.lastModified;
+            }
+            var ref;
+            try {
+            ref = JSON.parse(this.response);
+            }catch(e){
+              // console.log(e); //error expected
+              return;
+            }
+            Main.detectBgColor();
+            for (i = 0, len = ref.length; i < len; i++) {
+              poster = ref[i];
+              Posts.nameByPost[poster.p] = poster;
+            }
+            Posts.updateAllPosts();
+            return $.event('NamesSynced');
+          }
+          });
+
+        }catch(e){
+            console.log("FS: qp error", val, srv, e);
+        }
+      }
+
+    /*
 	  this.NSserver = (parseInt($.get('NSserver'))) || 'namesync.net,m8q16hakamiuv8ch.myfritz.net';
 	  this.NSserver.split(',').forEach(function(server){
 		  $.ajax(server, 'qp', 'GET', "t=" + g.threads + "&b=" + g.board, {
@@ -760,7 +938,14 @@
 			  return $.event('NamesSynced');
 			}
 		  });
-	  });
+	  });*/
+      
+      
+      
+      
+      
+      
+      
       if (repeat && g.view === 'thread' && !Sync.disabled) {
         return setTimeout(Sync.sync, 30000, true);
       }
@@ -804,38 +989,63 @@
     },
     send: function(name, email, subject, postID, threadID, retryTimer) {
 	  var r;
-	  this.NSserver = (parseInt($.get('NSserver'))) || 'namesync.net,m8q16hakamiuv8ch.myfritz.net';
-	  this.NSserver.split(',').forEach(function(server){
-        var r = $.ajax(server, 'sp', 'POST', "p=" + postID + "&t=" + threadID + "&b=" + g.board + "&n=" + (encodeURIComponent(name)) + "&s=" + (encodeURIComponent(subject)) + "&e=" + (encodeURIComponent(email)) + "&dnt=" + (Set['Do Not Track'] ? '1' : '0') + "&ca=" + parseInt($.get("ColorAmount"))+ "&ch=" + parseInt($.get("ColorHue")), {
-			onerror: function() {
-			  if (!Sync.canRetry) {
-				return;
-			  }
-			  retryTimer = retryTimer || 0;
-			  if (retryTimer > 10000) {
-				++Sync.failedSends;
-				if (Sync.failedSends === 2) {
-				  $.event('CreateNotification', {
-					detail: {
-					  type: 'warning',
-					  content: 'Connection errors with sync server. Fields may not appear.',
-					  lifetime: 8
-					}
-				  });
-				}
-				if (Sync.failedSends >= 3) {
-				  Sync.canRetry = false;
-				  setTimeout(function() {
-					return Sync.canRetry = true;
-				  }, 60000);
-				}
-				return;
-			  }
-			  retryTimer += retryTimer < 5000 ? 2000 : 5000;
-			  return setTimeout(Sync.send, retryTimer, name, email, subject, postID, threadID, retryTimer);
-			}
-		  });
-	  });
+      
+      
+      
+      
+	 // this.NSserver = (parseInt($.get('NSserver'))) || 'namesync.net,m8q16hakamiuv8ch.myfritz.net';
+	 // this.NSserver.split(',').forEach(function(server){
+    var len, i;
+    for (i = 0, len = MasterServer.data.server.length; i < len; i++) {
+      var srv = MasterServer.getServer(i);
+      var val = MasterServer.getServerInfo(i);
+      if (val.sp === false) { continue; }
+      try{ 
+      
+      
+      
+
+          var r = $.ajax(srv, 'sp', 'POST', "p=" + postID + "&t=" + threadID + "&b=" + g.board + "&n=" + (encodeURIComponent(name)) + "&s=" + (encodeURIComponent(subject)) + "&e=" + (encodeURIComponent(email)) + "&dnt=" + (Set['Do Not Track'] ? '1' : '0') + "&ca=" + parseInt($.get("ColorAmount"))+ "&ch=" + parseInt($.get("ColorHue")), {
+        onerror: function() {
+          if (!Sync.canRetry) {
+          return;
+          }
+          retryTimer = retryTimer || 0;
+          if (retryTimer > 10000) {
+          ++Sync.failedSends;
+          if (Sync.failedSends === 2) {
+            $.event('CreateNotification', {
+            detail: {
+              type: 'warning',
+              content: 'Connection errors with sync server. Fields may not appear.',
+              lifetime: 8
+            }
+            });
+          }
+          if (Sync.failedSends >= val.retry) {
+            Sync.canRetry = false;
+            setTimeout(function() {
+            return Sync.canRetry = true;
+            }, 60000);
+          }
+          return;
+          }
+          retryTimer += retryTimer < 5000 ? 2000 : 5000;
+          return setTimeout(Sync.send, retryTimer, name, email, subject, postID, threadID, retryTimer);
+        }
+        });
+      
+
+      
+      
+      
+	    //});
+      }catch(e){
+            console.log("FS: sp error", val, srv, e);
+        }
+      }
+
+      
 	  return r; /*return any; its async anyway*/
     },
     clear: function() {
@@ -859,13 +1069,6 @@
 			}
 		  });
 	  });
-    },
-    import: function() {
-      
-      
-      alert("To be implemented");//TODO
-      
-      
     }
   };
   

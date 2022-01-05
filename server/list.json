@@ -20,14 +20,6 @@
         "retry": 10,
         "timeout": 30
       }
-    },
-    {
-      "example.org": {
-        "name": "backup backup",
-        "retry": 1,
-        "sp": false,
-        "qp": false
-      }
     }
   ],
   "revisit": 259200,

@@ -1,0 +1,32 @@
+{
+  "server": [
+    {
+      "namesync.net": {
+        "sp": true,
+        "qp": true,
+        "retry": 3,
+        "timeout": 15,
+        "prio": [
+          "t"
+        ]
+      }
+    },
+    {
+      "m8q16hakamiuv8ch.myfritz.net": {
+        "sp": true,
+        "qp": true,
+        "retry": 10,
+        "timeout": 30
+      }
+    },
+    {
+      "example.org": {
+        "retry": 1,
+        "sp": false,
+        "qp": false
+      }
+    }
+  ],
+  "revisit": 259200,
+  "api": 1
+}

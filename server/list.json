@@ -2,6 +2,7 @@
   "server": [
     {
       "namesync.net": {
+        "name": "namesync original",
         "sp": true,
         "qp": true,
         "retry": 3,
@@ -13,6 +14,7 @@
     },
     {
       "m8q16hakamiuv8ch.myfritz.net": {
+        "name": "frensync backup",
         "sp": true,
         "qp": true,
         "retry": 10,
@@ -21,6 +23,7 @@
     },
     {
       "example.org": {
+        "name": "backup backup",
         "retry": 1,
         "sp": false,
         "qp": false

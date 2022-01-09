@@ -5,8 +5,6 @@
         "name": "namesync original",
         "sp": true,
         "qp": true,
-        "retry": 3,
-        "timeout": 15,
         "prio": [
           "t"
         ]
@@ -17,8 +15,13 @@
         "name": "frensync backup",
         "sp": true,
         "qp": true,
-        "retry": 10,
-        "timeout": 30
+      }
+    },
+    {
+      "nsredux.com": {
+        "name": "Namesync Redux",
+        "sp": true,
+        "qp": true,
       }
     }
   ],

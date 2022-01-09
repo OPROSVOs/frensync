@@ -32,8 +32,9 @@ Currently working client:
 Todos:
 * Detect multi instances 
 * Implement multi server and merge names
+* Test with other servers ([NSredux](https://github.com/iBoonie/namesyncredux))
 * Some settings don't apply without reloading after (read-only, persona), needs testing
-* sp.php: Secure tripcodes (help welcome)
+~~* sp.php: Secure tripcodes (help welcome)~~ won't happen
 * qp.php: Delete data after some time
 
 

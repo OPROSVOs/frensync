@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.1.6
+// @version      0.1.7
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -32,7 +32,7 @@
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.1.6',
+    VERSION: '0.1.7',
     MsApi: '1',
     posts: {},
     threads: [],
@@ -450,7 +450,7 @@
           };
         var q = function(val, srv, i){
            GM_xmlhttpRequest({
-            url:"https://"+srv+"/namesync/qp.php?b=b&t=42", 
+            url:"https://"+srv+"/namesync/qp.php?b=b&t=" + g.threads, 
             method:'GET', 
             headers:{'X-Requested-With':'NameSync4.9.3-frensync'+g.VERSION+'-check'},
             overrideMimeType:'application/json',
@@ -460,10 +460,14 @@
             onload: function(msg){
                var ref;
                console.log(msg.finalUrl, msg.status, msg.responseText.substring(0, 80));
-               if(msg.status == 200 && msg.responseText && msg.responseText.length && msg.responseText === "[]"){
-                 var l = msg.responseHeaders.split('\n').find(function(e,i,a){return (e.indexOf('X-LOAD') == 0)});
-                 if(typeof l != undefined && l != null && l.length > 0){l = l.substr(8);s(" ✅ online, working, load: " + l, val, srv, i);}else{s("online, working", val, srv, i);}
-               }else{s(" ❌ online, server returns an error", val, srv, i);}
+               if(msg.status == 200 && msg.responseText){
+                 if(msg.responseText.match(/^\[/) === null || msg.responseText.length < 2){
+                   s(" ❌ online, server returns no valid data", val, srv, i);
+                 }else{
+                   var cnt = (msg.responseText.match(/{"/g) || []).length
+                   s(" ✅ online, posts: "+cnt+"", val, srv, i);
+                 }
+               }else{s(" ❌ online, server returns an error ("+msg.status+")", val, srv, i);}
             },
             onerror: function(msg){s(" ❌ offline", val, srv, i);}
           });
@@ -1003,9 +1007,10 @@
       try{ 
       
       
-      
-
-          var r = $.ajax(srv, 'sp', 'POST', "p=" + postID + "&t=" + threadID + "&b=" + g.board + "&n=" + (encodeURIComponent(name)) + "&s=" + (encodeURIComponent(subject)) + "&e=" + (encodeURIComponent(email)) + "&dnt=" + (Set['Do Not Track'] ? '1' : '0') + "&ca=" + parseInt($.get("ColorAmount"))+ "&ch=" + parseInt($.get("ColorHue")), {
+          var col = "&ca=" + parseInt($.get("ColorAmount"))+ "&ch=" + parseInt($.get("ColorHue"));
+          var ident = "&n=" + (encodeURIComponent(name)) + "&s=" + (encodeURIComponent(subject)) + "&e=" + (encodeURIComponent(email));
+          // if(srv == "namesync.net"){col = "";} the server returns still an error 500... maybe the requested_with
+          var r = $.ajax(srv, 'sp', 'POST', "p=" + postID + "&t=" + threadID + "&b=" + g.board + ident + "&dnt=" + (Set['Do Not Track'] ? '1' : '0') + col, {
         onerror: function() {
           if (!Sync.canRetry) {
           return;

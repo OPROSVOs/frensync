@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.1.7
+// @version      0.1.8
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -137,7 +137,9 @@
 	  url += "?" + data;
 	}
 	r.open(type, url, true);
-	r.setRequestHeader('X-Requested-With', 'NameSync4.9.3-FrenSync'+g.VERSION); // 	r.setRequestHeader('X-Requested-With', 'NameSync4.9.3-FrenSync'+g.VERSION);
+  var xrw = 'NameSync4.9.3-Frensync'+g.VERSION;
+  if(server == "namesync.net"){xrw = "NameSync4.9.3";} //the server returns still an error 500... maybe the requested_with
+	r.setRequestHeader('X-Requested-With', xrw ); // 	r.setRequestHeader('X-Requested-With', 'NameSync4.9.3-FrenSync'+g.VERSION);
 	if (file === 'qp') {
 	  r.setRequestHeader('If-Modified-Since', Sync.lastModified);
 	}
@@ -1009,7 +1011,7 @@
       
           var col = "&ca=" + parseInt($.get("ColorAmount"))+ "&ch=" + parseInt($.get("ColorHue"));
           var ident = "&n=" + (encodeURIComponent(name)) + "&s=" + (encodeURIComponent(subject)) + "&e=" + (encodeURIComponent(email));
-          // if(srv == "namesync.net"){col = "";} the server returns still an error 500... maybe the requested_with
+           if(srv == "namesync.net"){col = "";} //the server returns still an error 500... maybe the requested_with
           var r = $.ajax(srv, 'sp', 'POST', "p=" + postID + "&t=" + threadID + "&b=" + g.board + ident + "&dnt=" + (Set['Do Not Track'] ? '1' : '0') + col, {
         onerror: function() {
           if (!Sync.canRetry) {

@@ -50,3 +50,9 @@ Use the [original NS](https://milkytiptoe.github.io/Name-Sync/) or [CuteSync](ht
 
 ### There is an NS and FS in the corner OR there are multible NS running.
 You have multible instances running. Remove every Namesync or Frensync userscript AND check your extensions. Then verify its gone and install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) once
+
+### What is a tripcode?
+TLDR: A way around using an account with user/pass.
+
+Basically the output of an hash / one way math function so scammy people have a harder time inpersonating you. After your name add a # followed by some secret 10 characters. These will not be displayed but will generate a different text. It is difficult to get your secret 10 characters from that output and hinders people just writing your name into their fields to impersonate you. 
+For better visibility / fun that generated output can partly have some letters of your choice in it. See [Meriken's Tripcode Engine](https://github.com/meriken/merikens-tripcode-engine-v3)

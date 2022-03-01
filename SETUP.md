@@ -32,7 +32,7 @@ To get the original Namesync working with Adblockers like uBlock, add this one t
 ## Optional steps:
 * install [PersonaPlus](https://github.com/ErinSteph/PersonaPlus) to switch between multible names / tripcodes
 * install [OneeChan](https://github.com/KevinParnell/OneeChan/raw/master/builds/OneeChan.user.js) (works, tested by BCBoi)
-* install [TripfagFinder-K](https://github.com/ErinSteph/Tripfag-Finder-K) (the abandoned original one is here: [TFF](https://github.com/bstats/Tripfag-Finder/raw/master/Tripfag-Finder.user.js)) to find threads with namefags
+* install [TripfagFinder-K](https://github.com/ErinSteph/Tripfag-Finder-K) (the abandoned original one is here: [TFF](https://github.com/bstats/Tripfag-Finder)) to find threads with namefags
 * For mobile: For lightweight mobile support, check out [CuteSync](https://github.com/ErinSteph/Cute-Sync) which doesn't rely on 4chanX
 * get a tripcode with your name which makes stealing your name harder. [Meriken's Tripcode Engine](https://github.com/meriken/merikens-tripcode-engine-v3) is currently the best.
 

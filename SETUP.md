@@ -9,48 +9,42 @@
 * Backup your persona if you had one
 * No uBlock or Adblock rule update required if it has been previously set up
 * Disable every NS script **OR** extension that ran earlier and check that **only** 4chanX is active
-* That earlier version on the m8b16... site is dead - delete it.
 * Install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) which includes Namesync
 
-
-## Optional steps:
-* Optional: install [PersonaPlus](https://pastebin.com/3jHyZwF3) to switch between multible names / tripcodes
-* Optional: install [OneeChan](https://github.com/KevinParnell/OneeChan/raw/master/builds/OneeChan.user.js) (works, tested by BCBoi)
-* Optional: install [TripfagFinder](https://github.com/bstats/Tripfag-Finder/raw/master/Tripfag-Finder.user.js) (**broken?**)
-* Recommended: To get the original Namesync working with Adblockers like uBlock, add this one time to your **My Filter** ruleset:
+## Recommended: AdBlock exception (Since the domains got flagged on some list)
+To get the original Namesync working with Adblockers like uBlock, add this one time to your **My Filter** ruleset:
 ```
+! 4chan-X exception for embeds and preview images
 @@||4chan.org^*$csp=default-src 'self' * data: 'unsafe-inline' 'unsafe-eval'
 @@||4channel.org^*$csp=default-src 'self' * data: 'unsafe-inline' 'unsafe-eval'
 @@|blob:$image,media,domain=4chan.org
 @@|blob:$image,media,domain=4channel.org
 @@||boards.4chan.org^$csp
 @@||boards.4channel.org^$csp
+! NS exception 
 @@||namesync.net$xmlhttprequest,domain=4chan.org
 @@||namesync.net$xmlhttprequest,domain=4channel.org 
+! TFF-K exception
+@@||t-f.xyz$xmlhttprequest,domain=4chan.org
+@@||erinsteph.com$xmlhttprequest,domain=4chan.org
+@@||erinsteph.com$xmlhttprequest,domain=4channel.org
 ```
+## Optional steps:
+* Optional: install [PersonaPlus](https://github.com/ErinSteph/PersonaPlus) to switch between multible names / tripcodes
+* Optional: install [OneeChan](https://github.com/KevinParnell/OneeChan/raw/master/builds/OneeChan.user.js) (works, tested by BCBoi)
+* Optional: install [TripfagFinder-K](https://github.com/ErinSteph/Tripfag-Finder-K) (the abandoned original one is here: [TFF](https://github.com/bstats/Tripfag-Finder/raw/master/Tripfag-Finder.user.js)) to find threads with namefags
+* Optional: For lightweight mobile support, check out [CuteSync](https://github.com/ErinSteph/Cute-Sync) which doesn't rely on 4chanX.
 * Optional: get a tripcode with your name which makes stealing your name harder. [Meriken's Tripcode Engine](https://github.com/meriken/merikens-tripcode-engine-v3) is currently the best.
-* Head to 4chan and set 4chanX up and Namesync/Frensync with your persona (settings:in the top right) and have fun.
+
+Head to 4chan and set 4chanX up and Namesync/Frensync with your persona (settings:in the top right) and have fun.
 
 ## Currently no support for:
 
 The standalone browser extension (FF) (CR)
-
 The iOS Webhub
+Use the [original NS](https://milkytiptoe.github.io/Name-Sync/) or [CuteSync](https://github.com/ErinSteph/Cute-Sync) for that.
 
 ## FAQ / Debugging:
 
 ### There is an NS and FS in the corner OR there are multible NS running.
 You have multible instances running. Remove every Namesync or Frensync userscript AND check your extensions. Then verify its gone and install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) once
-
-
-### Somebody gave me a link to an old version and features are missing / its buggy.
-Delete this userscript, ignore it and start from the top of this document.
-
-
-### I still get the message to upgrade after installing it
-There is still an old script running. Check your userscripts and extensions.
-
-
-### Why am i getting the message to upgrade
-Because the first version was full of bugs and it doesn't update. It was just a quick way to prove thats it works. Having this message now prevents any future change from breaking this first version. Also if any future bugs come up, they can be fixed within a day without every user having to do an update procedure.
-

@@ -38,6 +38,15 @@ To get the original Namesync working with Adblockers like uBlock, add this one t
 
 Head to 4chan and set 4chanX up and Namesync/Frensync with your persona (settings:in the top right) and have fun.
 
+## Setting it up
+To set a name, open 4chan and open the FS settings in the top right: ![grafik](https://user-images.githubusercontent.com/19379091/162594758-062a7fc5-bc89-4849-adbb-44d9f2363c8a.png)
+
+Then check the Persona box, enter a name, optionally an email/subject/color and relaod the page:
+![grafik](https://user-images.githubusercontent.com/19379091/162594823-58822efc-89ee-41cf-b2b5-d2b4a0f4f925.png)
+And if everything works, the name appears in the thread and the counter in the server status in the settings goes up.
+If everything works perfect, all three servers increment by one.
+If not, double check the adblock / ublock settings in this guide in the optional steps.
+
 ## Currently no support for:
 
 The standalone browser extension (FF) (CR)
@@ -56,3 +65,34 @@ TLDR: A way around using an account with user/pass.
 
 Basically the output of an hash / one way math function so scammy people have a harder time inpersonating you. After your name add a # followed by some secret 10 characters. These will not be displayed but will generate a different text. It is difficult to get your secret 10 characters from that output and hinders people just writing your name into their fields to impersonate you. 
 For better visibility / fun that generated output can partly have some letters of your choice in it. See [Meriken's Tripcode Engine](https://github.com/meriken/merikens-tripcode-engine-v3)
+
+### The extension throws an error: localstorage get failed / localstorage access denied / ns-error-file-corrupted
+That means that the extension can't access its own settings to store the name and checkboxes.
+This is due to an **corrupted browser profile** which crashes some api calls from the extension.
+Either run checkdisk/chkdsk on the drive or delete the broken profile. You also might want to keep an eye on that drive as it might be broken soon.
+
+### Sync works only to one server
+Check your adblock / ublock settings and filters.
+Make sure you have the upper exceptions in your ruleset.
+
+### Things don't work / Kittens are dying
+If the extension doesn't work as intended, first check this:
+- Only one user script extension (like tampermonkey) is running and working
+- 4chanX is running and working
+- There is one FS in the corner, nothing else and its the newest version
+- The server status in the control panel shows green ticks, no red cross
+- 4chan isn't doing weird things (like sesional things or trolling mods)
+- Your settings are correct like the screenshot up in the setup
+- Wait 5 minutes, reload and try again posting
+
+If all is fine and you want to help, continue here:
+
+You can open up the dev tools by pressing **F12** and look into the **Console**
+
+When opening the FS settings, you can see a fraction of each server response in the console.
+When sending a post there should be no error popping up in the console. Or atleast none from frensync or 4chanX (right side of the error message).
+
+If theres frensync.js or 4chanX.js popping up as an error, i screwed up something. Posting this screenshot to the issues (or *the* thread) would help a lot. Please include the browser + version and user script extension as well for reproducing the error.
+A known bug is when OP has a name and theres no post, the background color chack fails gently.
+
+Pressing **F12** closes the dev tools again.

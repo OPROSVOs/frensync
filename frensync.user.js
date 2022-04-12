@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.1.8
+// @version      0.1.9
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -189,14 +189,15 @@
       'Sync on /soc/': [true, 'Enable sync on /soc/. (Disabled)'],
       'Sync on /s4s/': [true, 'Enable sync on /s4s/. (Disabled)'],
       'Sync on /trash/': [true, 'Enable sync on /trash/.'],
-      'Custom Names': [false, 'Posters can be given custom names.'],
+     // 'Custom Names': [false, 'Posters can be given custom names.'], // Broken because no uID for you
       'Read-only Mode': [false, 'Share none of your sync fields (reload after change).'],
       'Hide Sage': [false, 'Share none of your sync fields when sage is in the email field.'],
       'Mark Sync Posts': [false, 'Mark posts made by sync users.'],
       'Do Not Track': [false, 'Request no sync field tracking by third party archives.'],
-      'Do Not Track TFF': [false, 'Request to not show fields in a manner that shows what thread is active.'],
+     // 'Do Not Track TFF': [false, 'Request to not show fields in a manner that shows what thread is active.'], // Not implemented
       'Colors': [true, 'Show name colors when available.'],
       'Smart email': [true, 'Try to find out what content in in there if its not an email (discord, links).'],
+      'Show origin': [false, 'DEBUG: Show the sync source. Order: Frensync, NamesyncRedux, Namesync original'],
     },
     other: {
       'Persona Fields': [false],
@@ -579,10 +580,18 @@
       if (!linfo && !oinfo) {
         return;
       }
+      
+      //console.log(oinfo);
+
       namespan = this.nodes.name;
       subjectspan = this.nodes.subject;
       tripspan = $('.postertrip', this.nodes.info);
       emailspan = $('.useremail', this.nodes.info);
+      
+      if(Set['Show origin'] && oinfo != null) {
+          subject ="[" + ((oinfo.m8q)?"✔️":"❌")+((oinfo.nsr)?"✔️":"❌")+((oinfo.nam)?"✔️":"❌") + "]"+ (subject||"") ;
+      }
+      
       if (namespan.textContent !== name) {
         namespan.textContent = name;
       }
@@ -650,9 +659,16 @@
           }
         }
       }
-    },
+    }
+ /*     
+  * BROKEN: because there is no uID
+  * Todo: add uid to JSON?
+  * 
+      ,
     customName: function(uID) {
       var n;
+      
+      console.log(uID, Posts.nameByID[uID]);
       if (!(n = prompt('Custom Name', 'Anonymous'))) {
         return;
       }
@@ -661,6 +677,7 @@
       };
       return Posts.updateAllPosts();
     }
+ */
   };
 
   Settings = {
@@ -762,7 +779,7 @@
       
       field = $.el('fieldset');
       $.add(field, $.el('legend', {
-        textContent: 'Main'
+        textContent: 'Main (settings require reload to apply)'
       }));
       ref = Config.main;
       for (setting in ref) {
@@ -882,6 +899,7 @@
       for (i = 0, len = MasterServer.data.server.length; i < len; i++) {
         var srv = MasterServer.getServer(i);
         var val = MasterServer.getServerInfo(i);
+        var index = i;
         if (val.qp === false) { continue; }
         try{
             //console.log(val, srv, i);
@@ -901,11 +919,22 @@
               // console.log(e); //error expected
               return;
             }
+            var trace = Set['Show origin'];
+            var origin = this.responseURL.substr(8,3);
             Main.detectBgColor();
-            for (i = 0, len = ref.length; i < len; i++) {
-              poster = ref[i];
-              Posts.nameByPost[poster.p] = poster;
+            for (j = 0, len = ref.length; j < len; j++) {
+              var fresh = ref[j];
+              var stale = Posts.nameByPost[ref[j].p];
+              if(stale === undefined){stale = {}}
+              for (var a in fresh) {stale[a] = fresh[a]}
+              if(trace){
+                stale[origin] = 1;
+              }
+              Posts.nameByPost[ref[j].p] = stale;
+              
             }
+            
+            
             Posts.updateAllPosts();
             return $.event('NamesSynced');
           }

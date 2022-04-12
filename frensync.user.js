@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.1.9
+// @version      0.1.10
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -926,7 +926,9 @@
               var fresh = ref[j];
               var stale = Posts.nameByPost[ref[j].p];
               if(stale === undefined){stale = {}}
-              for (var a in fresh) {stale[a] = fresh[a]}
+              for (var a in fresh) {
+                if(!(a == 't' && stale[a] != null) || stale[a] == null){stale[a] = fresh[a]} 
+              }
               if(trace){
                 stale[origin] = 1;
               }

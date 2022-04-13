@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.1.10
+// @version      0.1.11
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -208,7 +208,7 @@
   CSS = {
     init: function() {
       var css;
-      css = ".section-name-sync input[type='text'] {\n  border: 1px solid #CCC;\n  width: 148px;\n  padding: 2px;\n}\n.section-name-sync input[type='button'] {\n  padding: 3px;\n  margin-bottom: 6px;\n}\n.section-name-sync p {\n  margin: 0 0 8px 0;\n}\n.section-name-sync ul {\n  list-style: none;\n  margin: 0;\n  padding: 8px;\n}\n.section-name-sync div label {\n  text-decoration: underline;\n}\n/* Appchan X description fix */\n.section-name-sync .description {\n  display: inline;\n}\n/* ccd0 4chan X clear fix */\n.section-name-sync {\n  clear: both;\n}\n/* Show sync fields in ccd0 4chan X */\n#qr.sync-enabled .persona input {\n  display: inline-block !important;\n}\n.section-name-sync {\n  overflow-y:scroll;\n}\n";
+      css = ".section-name-sync input[type='text'] {\n  border: 1px solid #CCC;\n  width: 148px;\n  padding: 2px;\n}\n.section-name-sync input[type='button'] {\n  padding: 3px;\n  margin-bottom: 6px;\n}\n.section-name-sync p {\n  margin: 0 0 8px 0;\n}\n.section-name-sync ul {\n  list-style: none;\n  margin: 0;\n  padding: 8px;\n}\n.section-name-sync div label {\n  text-decoration: underline;\n}\n/* Appchan X description fix */\n.section-name-sync .description {\n  display: inline;\n}\n/* ccd0 4chan X clear fix */\n.section-name-sync {\n  clear: both;\n}\n/* Show sync fields in ccd0 4chan X */\n#qr.sync-enabled .persona input {\n  display: inline-block !important;\n}\n.section-name-sync {\n  overflow-y:scroll;\n}\n .nameBlock {\n  white-space: nowrap;}\n";
       if (Set['Filter']) {
         css += ".sync-filtered {\n  display: none !important;\n}";
       }

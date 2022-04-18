@@ -32,7 +32,7 @@
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.1.7',
+    VERSION: '0.1.12',
     MsApi: '1',
     posts: {},
     threads: [],
@@ -921,10 +921,13 @@
           $.ajax(srv, 'qp', 'GET', "t=" + g.threads + "&b=" + g.board, {
           onloadend: function() {
             var i, len, poster, ref;
-            if (!(this.status === 200 && this.response)) {return;}
+            if (!(this.status === 200 && this.response)) {
+            return;
+            }
             if (g.view === 'thread') {
             Sync.lastModified = this.getResponseHeader('Last-Modified') || Sync.lastModified;
             }
+            var ref;
             try {
             ref = JSON.parse(this.response);
             }catch(e){
@@ -944,7 +947,6 @@
               
               if(stale === undefined){stale = {}}
               for (var a in fresh) {
-                //attempt to stop a value fight if theres small differences
                 if(stale[a] != null && fresh[a] != null){
                   if(stale[a].length != fresh[a].length){
                     if(fresh[a].length < stale[a].length && fresh[a].length > 0){

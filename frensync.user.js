@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.1.11
+// @version      0.1.12
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -197,6 +197,7 @@
      // 'Do Not Track TFF': [false, 'Request to not show fields in a manner that shows what thread is active.'], // Not implemented
       'Colors': [true, 'Show name colors when available.'],
       'Smart email': [true, 'Try to find out what content in in there if its not an email (discord, links).'],
+      'Mark OP': [true, 'Mark the OP in catalog if OP is a namefag or theres a namefag inside '],
       'Show origin': [false, 'DEBUG: Show the sync source. Order: Frensync, NamesyncRedux, Namesync original'],
     },
     other: {
@@ -213,7 +214,7 @@
         css += ".sync-filtered {\n  display: none !important;\n}";
       }
       if (Set['Mark Sync Posts']) {
-        css += ".sync-post {\n  position: relative;\n}\n.sync-post:after {\n  content: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAMAAAAMCGV4AAAAqFBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWFhYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWFhYAAAAAAAAAAAAAAAAAAAAWFhYAAAAAAAAWFhYAAAAWFhYWFhYAAAAAAAAAAAAAAAAAAAAWFhYAAAAAAAAWFhYWFhYAAAAAAAAAAAAAAAAWFhYAAAAAAAAAAAAAAAAAAAAPAnI3AAAAOHRSTlMzADU0NiwGJjIvDi03AAEEFyUnHzAkCQUCIQUSKy0xHSgIKS4aESoKGCYDDCIvKBYpHg4jEBMHFH8kut4AAACvSURBVHheHY7FlsNADAQFw7ZjjO0wMy3v//9ZNO6DXpd0KAFK8sImiS1yxC7yISFiJtLhtBYuFMEQcssHYCCWqpRMpgX0H3JV+rOegywW8MOCkx4xMDPtoCYgPUJs5433zRZMu2mnIrlOc2NMB3tbluXxVzZnr5ML2JQonQjeHHF6h7HI+fmarVwUfkWO+sGffmcwVixtiNImg6qe+XgDospgBmGEfyu9dE31L19kb12bCeREPHJzAAAAAElFTkSuQmCC');\n  position: absolute;\n  bottom: 2px;\n  right: 5px;\n}";
+        css += ".sync-post-marker {\n  position: relative;\n}\n.sync-post {\n  position: relative;\n}\n.sync-post:after {\n  content: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAMAAAAMCGV4AAAAqFBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWFhYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWFhYAAAAAAAAAAAAAAAAAAAAWFhYAAAAAAAAWFhYAAAAWFhYWFhYAAAAAAAAAAAAAAAAAAAAWFhYAAAAAAAAWFhYWFhYAAAAAAAAAAAAAAAAWFhYAAAAAAAAAAAAAAAAAAAAPAnI3AAAAOHRSTlMzADU0NiwGJjIvDi03AAEEFyUnHzAkCQUCIQUSKy0xHSgIKS4aESoKGCYDDCIvKBYpHg4jEBMHFH8kut4AAACvSURBVHheHY7FlsNADAQFw7ZjjO0wMy3v//9ZNO6DXpd0KAFK8sImiS1yxC7yISFiJtLhtBYuFMEQcssHYCCWqpRMpgX0H3JV+rOegywW8MOCkx4xMDPtoCYgPUJs5433zRZMu2mnIrlOc2NMB3tbluXxVzZnr5ML2JQonQjeHHF6h7HI+fmarVwUfkWO+sGffmcwVixtiNImg6qe+XgDospgBmGEfyu9dE31L19kb12bCeREPHJzAAAAAElFTkSuQmCC');\n  position: absolute;\n  bottom: 2px;\n  right: 5px;\n}";
       }
       if (Set['Custom Names']) {
         css += "div#qp .sync-custom, div.inline .sync-custom {\n  display: none;\n}";
@@ -342,7 +343,9 @@
     detectBgColor: function() {
       var yiq = 225; //assume bright
       try{
-        var rgb = window.getComputedStyle($('.reply')).getPropertyValue( "background-color" ) || "rgb(224,224,224)";
+        var root = $('.reply');
+        if(root == null){root = d.body} //no reply or catalog
+        var rgb = window.getComputedStyle(root).getPropertyValue( "background-color" ) || "rgb(224,224,224)";
             rgb = rgb.replace(/[^.\d\,]/g, '').split(',') //"rgb(214, 218, 240)" => 214, 218, 240
             yiq = ((parseInt(rgb[0])*299)+(parseInt(rgb[1])*587)+(parseInt(rgb[2])*114))/1000;
       }catch(e){console.log(e);}
@@ -591,6 +594,18 @@
       if(Set['Show origin'] && oinfo != null) {
           subject ="[" + ((oinfo.m8q)?"✔️":"❌")+((oinfo.nsr)?"✔️":"❌")+((oinfo.nam)?"✔️":"❌") + "]"+ (subject||"") ;
       }
+      //console.log(this);
+      //mark thread
+      if(Set['Mark OP'] && oinfo != null && oinfo.m === true) {
+        if($('.sync-marker-icon', this.nodes.root) == null){
+          var markerspan = $.el('img', {
+              className: 'sync-marker-icon',
+              alt: 'Synced Post',
+              src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAABeUlEQVQY01WQSS8DYQCG3+/r6Ey1zOgUtUaIpYi0XCSERLhxEbEeJE4SPwCROEq4SpxcJJZGnDiQiAt6tDSkEluk0kNVR6fVZWr0cyF47u/zJg/BL5LsMI/J9ZwLAAv79MvwTXwdgGqkvIsAgEEi3Z0z5e6SFlH+M0TgTA3dHoT2bTXmfmIghtqe5YoLsVQQrraDW75NxQ1kUDcsjTlHS4ayrUY8eRQ/Vz0gzhY4LKaj+ceFgCc29y0jb3fpfi2qg3IU8VA6QouaLW0Rf1KLeOjKn1f24k2u7o0/TASvomlKqYlLqToI0ZDOSrTyHH+vJTUvADCdeURY/Ra7gM+PFKOZDxa3N+XwfWtVO+aazDQA8qPlO2JTYplgDF4mTjhzvlEySVlgn4DdIVHFq/QCIA2jeSONg4VDwetY/Hk3tUhck/lRNaAdVnZau4qduRJj//McL/lHdIUdkRxTbnssGT2VIMu0/n3Y5hCcBAby6kudh28SGwBUAPgCOfGTVEPk+YIAAAAASUVORK5CYII'
+          });
+          $.add($('.catalog-icons', this.nodes.root), markerspan);
+        }
+      }
       
       if (namespan.textContent !== name) {
         namespan.textContent = name;
@@ -600,7 +615,7 @@
           subjectspan.textContent = subject;
         }
       } else {
-        if (subjectspan.textContent !== '') {
+        if (subjectspan.textContent !== '' && subject !== false) {
           subjectspan.textContent = '';
         }
       }
@@ -906,13 +921,10 @@
           $.ajax(srv, 'qp', 'GET', "t=" + g.threads + "&b=" + g.board, {
           onloadend: function() {
             var i, len, poster, ref;
-            if (!(this.status === 200 && this.response)) {
-            return;
-            }
+            if (!(this.status === 200 && this.response)) {return;}
             if (g.view === 'thread') {
             Sync.lastModified = this.getResponseHeader('Last-Modified') || Sync.lastModified;
             }
-            var ref;
             try {
             ref = JSON.parse(this.response);
             }catch(e){
@@ -925,9 +937,23 @@
             for (j = 0, len = ref.length; j < len; j++) {
               var fresh = ref[j];
               var stale = Posts.nameByPost[ref[j].p];
+              /*if(stale['p'] != null && fresh['p'] != null && stale['p'] == fresh['p']){
+                console.log("skipped");
+                continue;
+              } // Doesnt work for deletes */
+              
               if(stale === undefined){stale = {}}
               for (var a in fresh) {
-                if(!(a == 't' && stale[a] != null) || stale[a] == null){stale[a] = fresh[a]} 
+                //attempt to stop a value fight if theres small differences
+                if(stale[a] != null && fresh[a] != null){
+                  if(stale[a].length != fresh[a].length){
+                    if(fresh[a].length < stale[a].length && fresh[a].length > 0){
+                      stale[a] = fresh[a]; //update if shorter
+                    }
+                  }
+                }
+                //not for trips that are set or empty variables
+                if((a != 't' && stale[a] == null) || stale[a] == null){stale[a] = fresh[a]} 
               }
               if(trace){
                 stale[origin] = 1;

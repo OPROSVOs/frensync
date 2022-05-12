@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.1.12
+// @version      0.1.13
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -32,7 +32,7 @@
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.1.12',
+    VERSION: '0.1.13',
     MsApi: '1',
     posts: {},
     threads: [],
@@ -138,8 +138,8 @@
 	}
 	r.open(type, url, true);
   var xrw = 'NameSync4.9.3-Frensync'+g.VERSION;
-  if(server == "namesync.net"){xrw = "NameSync4.9.3";} //the server returns still an error 500... maybe the requested_with
-	r.setRequestHeader('X-Requested-With', xrw ); // 	r.setRequestHeader('X-Requested-With', 'NameSync4.9.3-FrenSync'+g.VERSION);
+  if(server == "namesync.net"){xrw = "NameSync4.9.3";} 
+	r.setRequestHeader('X-Requested-With', xrw ); 
 	if (file === 'qp') {
 	  r.setRequestHeader('If-Modified-Since', Sync.lastModified);
 	}
@@ -353,16 +353,24 @@
       return yiq;
     },    
     handleEmailLink: function(str) {
-      if(str.match(/^(https?|ftp):\/\/[^\s\/$.?#].[^\s]*$/i) == null){//assume not a link
-        if(str.match(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/) !== null){ //assume email
-          return 'mailto:' + str;
-        }else{// its not a link and not an email
-          if(str.match(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/i) !== null){//phone number...
-            return 'tel:' + str;
-          }//do nothing. cant differentiate between telegram and twitter and discord only supports invites
+      if(Set['Show origin']){
+        if(str.match(/^(javascript|chrome-extension):/i) !== null){ //block the low effort trolls
+            return 'unsafe:' + str;   
         }
+        if(str.match(/^(https?|ftp):\/\/[^\s\/$.?#].[^\s]*$/i) == null){//assume not a link
+          if(str.match(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/) !== null){ //assume email
+            if(str.match(/^(attachment|sender|cc:|bcc:|replay-to:)/i) !== null){return 'unsafe:mailto:' + str;} //Sending potentional dangerous files as email attachment links
+            return 'mailto:' + str;
+          }else{// its not a link and not an email
+            if(str.match(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/i) !== null){//phone number...
+              return 'tel:' + str;
+            }//do nothing. cant differentiate between telegram and twitter and discord only supports invites
+          }
+        }
+        return str; //do nothing if its already a link
+      }else{
+        return 'mailto:' + str; //The not so smart default
       }
-      return str; //do nothing if its already a link
     }
   };
   
@@ -583,8 +591,6 @@
       if (!linfo && !oinfo) {
         return;
       }
-      
-      //console.log(oinfo);
 
       namespan = this.nodes.name;
       subjectspan = this.nodes.subject;
@@ -594,7 +600,7 @@
       if(Set['Show origin'] && oinfo != null) {
           subject ="[" + ((oinfo.m8q)?"✔️":"❌")+((oinfo.nsr)?"✔️":"❌")+((oinfo.nam)?"✔️":"❌") + "]"+ (subject||"") ;
       }
-      //console.log(this);
+      
       //mark thread
       if(Set['Mark OP'] && oinfo != null && oinfo.m === true) {
         if($('.sync-marker-icon', this.nodes.root) == null){
@@ -655,6 +661,20 @@
           if (tripspan){tripspan.style.color=str;}
           if (namespan){namespan.style.color=str;}
       }
+      if(oinfo.sus){
+        var suspan = $.el('img', {
+              alt:  'Sus',
+              style:'margin-bottom:-3px',
+              src:  ' data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAAPCAMAAACGJ/w5AAAANlBMVEUAAAB0AAAAAQAzAQBoAAJmAjKbADCYBQHNAAAuNDH+AAD/MjJOZ2T/ZWSFtrT/mJn/zMv9//yGfUq+AAAAAXRSTlMAQObYZgAAALVJREFUKM+dklkOgzAMRC1vsaUoEve/bLNQGgeoSucjGIsnD+MAVCERIjwXJjNLf5BiiZnpQ2rXu4qP0R9io1K2rWDg+icBnPrdKKp5afIJhBsQDhATq1HOJed5Yj+vQDhAJbVE7k6rVbixujsVkhZqMl7COU2MJFWwrcOMp4VcgyHXBmrjkuD8iyGKU71blfYiMk9bN6CxP66bDBGc93hbj5kiWI/15ujX+hL8UV7zcUf0R9QLCHwJf/52egwAAAAASUVORK5CYII='
+        });
+        subjectspan.textContent = '';
+        $.add(subjectspan, suspan);
+        subjectspan&&(subjectspan.style.opacity='0.75');
+        namespan&&(namespan.style.opacity='0.05');
+        tripspan&&(tripspan.style.opacity='0.05');
+           
+      }
+      
       if (Set['Mark Sync Posts'] && this.isReply && Posts.nameByPost[this.ID]) {
         $.addClass(this.nodes.post, 'sync-post');
       }

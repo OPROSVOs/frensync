@@ -10,6 +10,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {exit("ok");}
 
 error_reporting (E_ALL ^ E_NOTICE);
 
+
+header("HTTP/1.1 501 Not Implemented");
+exit("Not implemented for now until there is an added hash so trolls can't mass delete posts");
+
+/*
+
+// OLD
+
 // Flood Protection
 include 'FloodProtection.php';
 $myname = basename(__FILE__);
@@ -39,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $t = test_input($_POST["t"]);
     $b = test_input($_POST["b"]);
 }else{
-    header("HTTP/1.1 405 Method Not Allowed");
+    header("HTTP/1.1 501 Not Implemented");
     exit("nope");
 }
 
@@ -61,5 +69,6 @@ $sql = "DELETE FROM s WHERE (p = {$p} AND t = {$t} AND b = {$b}) LIMIT 1; ";
 echo $db ->exec($sql);
 //if(!($b == "b" or $b == "trash" or $b == "s4s" or $b == "soc")){echo "nope";exit();}
 
+*/
 
 ?>

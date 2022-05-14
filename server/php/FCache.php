@@ -8,6 +8,12 @@ class FCache
  protected $name;
  protected $pfx;
 
+// Simple file cache:
+// Writes cache files to /tmp/systemd-apache* /tmp/FS-CACHE/ sha256 .dat with plaintext data
+// The sha256 is generated from the name of the data which must be unique
+// If it matches, it return the data when its within a certain time range
+// If the data from the server has been updated, the name to the dataset can be marked as dirty and things will be cleaned
+
  public function __construct($name = '', $data = null, $duration = 120, $dir = null, $autoclean = true){
          if(null === $dir){$dir = $this->getCacheDir('fs-cache');}
          $this->dir = $dir;

@@ -23,11 +23,11 @@ function test_input($data) {
 }
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $p = test_input($_POST["p"]);
-    $t = test_input($_POST["t"]);
     $b = test_input($_POST["b"]);
+    $t = $_POST["t"];
     $n = $_POST["n"];
-    $s = test_input($_POST["s"]);
-    $e = test_input($_POST["e"]);
+    $s = $_POST["s"];
+    $e = $_POST["e"];
     $dnt = test_input($_POST["dnt"]);
     $ca = test_input($_POST["ca"]);
     $ch = test_input($_POST["ch"]);

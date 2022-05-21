@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         frensync
+// @name         frensync-test
 // @version      0.2.0
 // @minGMVer     1.14
 // @minFFVer     26
-// @namespace    frensync
+// @namespace    frensync-test
 // @description  The userscript to sync additional fields on 4chan and its archives like Namesync but multi server. 4chanX required.
 // @license      CC BY-NC-SA 3.0; https://raw.githubusercontent.com/OPROSVOs/frensync/main/LICENSE
 // @author       milkytiptoe

@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.1.13
+// @version      0.1.14
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -32,7 +32,7 @@
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.1.13',
+    VERSION: '0.1.14',
     MsApi: '1',
     posts: {},
     threads: [],
@@ -353,11 +353,11 @@
       return yiq;
     },    
     handleEmailLink: function(str) {
-      if(Set['Show origin']){
+      if(Set['Smart email']){
         if(str.match(/^(javascript|chrome-extension):/i) !== null){ //block the low effort trolls
             return 'unsafe:' + str;   
         }
-        if(str.match(/^(https?|ftp):\/\/[^\s\/$.?#].[^\s]*$/i) == null){//assume not a link
+        if(str.match(/^(https?|ftp):[\\\/]{2,4}[^\s\/\\$.?#].[^\s]*$/i) === null){//assume not a link
           if(str.match(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/) !== null){ //assume email
             if(str.match(/^(attachment|sender|cc:|bcc:|replay-to:)/i) !== null){return 'unsafe:mailto:' + str;} //Sending potentional dangerous files as email attachment links
             return 'mailto:' + str;
@@ -365,9 +365,11 @@
             if(str.match(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/i) !== null){//phone number...
               return 'tel:' + str;
             }//do nothing. cant differentiate between telegram and twitter and discord only supports invites
+            return str; 
           }
+        }else{
+          return str; //do nothing if its already a link
         }
-        return str; //do nothing if its already a link
       }else{
         return 'mailto:' + str; //The not so smart default
       }
@@ -628,7 +630,8 @@
       if (email) {
         if (emailspan === null) {
           emailspan = $.el('a', {
-            className: 'useremail'
+            className: 'useremail',
+            target: '_new'
           });
           $.before(namespan, emailspan);
         }

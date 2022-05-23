@@ -29,6 +29,17 @@ Currently working client:
 * multi server works in the archive
 * added name color support
 
+Tests:
+* Firefox 100 - OK
+* Chrome 102 - OK
+* Yandex 22.3.4 - OK
+* Firefox mobile 66 - OK
+* ViolentMonkey - OK
+* TamperMonkey - OK (causes permission popups)
+* GreaseMonkey  - OK (differences in API but working)
+* 4chanX  - OK
+* AppchanX - Broken (Captcha broken, no color support)
+
 Todos:
 * Detect multi instances 
 * Implement multi server and merge names

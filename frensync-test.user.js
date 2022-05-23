@@ -127,7 +127,7 @@
   };
   
   GM_xhr_proxy=function(p){
-    console.log(p);
+    //console.log(p);
     if(    "function"==typeof GM_xmlhttpRequest)return GM_xmlhttpRequest(p); //ViolentMonkey, TamperMonkey
     if(GM&&"function"==typeof GM.xmlHttpRequest)return GM.xmlHttpRequest(p); //GreaseMonkeys new API
     return false;

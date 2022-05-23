@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync-test
-// @version      0.2.0
+// @version      0.2.1
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync-test
@@ -23,7 +23,7 @@
 // ==/UserScript==
 
 (function() {
-  var $, $$, CSS, Config, Filter, Main, Post, Posts, Set, MasterServer, Settings, Sync, d, g,
+  var $, $$, CSS, Config, Filter, Main, Post, Posts, Set, MasterServer, Settings, Sync, d, g, GM_xhr_proxy,
     indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   Set = {};
@@ -32,7 +32,7 @@
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.2.0',
+    VERSION: '0.2.1',
     MsApi: '1',
     posts: {},
     threads: [],
@@ -125,34 +125,51 @@
     }
     return frag;
   };
-
-  $.ajax = function(server, file, type, data, onload, onerror) {
-	var r, url;
-  url = "https://" + server + "/namesync/" + file + ".php";
-	if (type === 'GET') {
-	  url += "?" + data;
-	}
-  if (onerror == null) {
-    onerror = function(e){console.log(server, file, "gm-api xhr error:", e)};
-  }
-  var xrw = 'NameSync4.9.3-Frensync'+g.VERSION+'-gm';
-  if(server == "namesync.net" ){xrw = "NameSync4.9.3";} //the server returns still an error 500... maybe the requested_with
-	r = GM_xmlhttpRequest({
-    url:url,
-    data:data,
-    method:((type === 'GET')?'GET':'POST'),
-    overrideMimeType:'application/json',
-    headers: { // Just send all
-      "X-Requested-With": xrw,    // If not specified, navigator.userAgent will be used.
-      "If-Modified-Since": Sync.lastModified,            // If not specified, browser defaults will be used. //if (file === 'qp') {
-      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",  //if (type === 'POST') {
-      "Origin": location.protocol + '//' + location.hostname 
-    },
-    onload:onload,
-    onerror:onerror
-  });
-	//r.withCredentials = true; // leaving out is ok??
-	return r;
+  
+  GM_xhr_proxy=function(p){
+    console.log(p);
+    if(    "function"==typeof GM_xmlhttpRequest)return GM_xmlhttpRequest(p); //ViolentMonkey, TamperMonkey
+    if(GM&&"function"==typeof GM.xmlHttpRequest)return GM.xmlHttpRequest(p); //GreaseMonkeys new API
+    return false;
+  };
+ 
+  $.ajax = function(srv, file, type, data, onload, onerror) {
+    //one way gives the xhr as "param", the other as "this" and the other as "param.target"; this one unifies it to param
+    var onload_proxy =function(t){return this.status&&(t=this),t.target?onload(t.target):((null!=onload)?onload(t):false)}; 
+    var onerror_proxy=function(r){return this.status&&(r=this),null!=onerror?onerror(r):false}; //same as above
+    var client = ((srv == 'namesync.net')?'NameSync4.9.3':'NameSync4.9.3-Frensync'+g.VERSION);
+	  if(Set['GM_API XHR']){
+      // extension XHR:
+      return GM_xhr_proxy({
+        url:("https://" + srv + "/namesync/" + file + ".php" + ((type==='GET')?('?'+data):'')),
+        data:data,
+        method:((type === 'GET')?'GET':'POST'),
+        overrideMimeType:'application/json',
+        headers: {
+          "X-Requested-With": client,  
+          "If-Modified-Since": Sync.lastModified,         
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          "Origin": location.protocol + '//' + location.hostname 
+        },
+        onload:onload_proxy,
+        onerror:onerror_proxy
+      });
+    }else{ 
+      // regular XHR:
+      var r = new XMLHttpRequest();
+      if (file === 'qp') r.overrideMimeType('application/json');
+      var url = "https://" + srv + "/namesync/" + file + ".php";
+      if (type === 'GET') url += "?" + data;
+      r.open(type, url, true);
+      r.setRequestHeader('X-Requested-With', client); 
+      if (file === 'qp') r.setRequestHeader('If-Modified-Since', Sync.lastModified);
+      if (type === 'POST') r.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+      r.onloadend=onload_proxy;
+      r.onerror=onerror_proxy;  
+      r.withCredentials = true;
+      r.send(data);
+      return r; 
+    }
   };
 
   $.extend = function(object, properties) {
@@ -198,10 +215,27 @@
       'Mark Sync Posts': [false, 'Mark posts made by sync users.'],
       'Do Not Track': [false, 'Request no sync field tracking by third party archives.'],
      // 'Do Not Track TFF': [false, 'Request to not show fields in a manner that shows what thread is active.'], // Not implemented
+      
       'Colors': [true, 'Show name colors when available.'],
+      
+      // unchecked: just show a regular mailto: link while 
+      // checked: try to guess a if its a link or text and do the best. 
       'Smart email': [true, 'Try to find out what content in in there if its not an email (discord, links).'],
+      
+      //This shows a green circle next to the thread icons on the catalog if theres some synced post inside or if OP is using NS
+      //4chan in addition to cutting the fields also hides the subject in the default style so this is a way to see that there is something missing
       'Mark OP': [true, 'Mark the OP in catalog if OP is a namefag or theres a namefag inside '],
+      
+      //Regular XHRs run with the site traffic and any CORS problem or scriptblocker problem or Adblock problem will cause issues
+      //Having them routed over the extension goes around all this but each extension has a different version of the GM_API. 
+      //The newer ones use a different naming and this might cause problems.
+      'GM_API XHR': [false, 'DEBUG: Route data over a side channel to prevent CORS, Adblock & Scriptblock issues'],
+      
+      //Shows markers from which server a post got sync data
+      //To avoid more clutter this is just in fixed order and just a check or cross.
+      //A cross means that the server has no data either because the user didn't sync to there or the server has an fault or this client fails to get the server data
       'Show origin': [false, 'DEBUG: Show the sync source. Order: Frensync, NamesyncRedux, Namesync original'],
+      
     },
     other: {
       'Persona Fields': [false],
@@ -252,7 +286,7 @@
       });
     },
     query: function(server,  errCall) {
-      return GM_xmlhttpRequest({
+      return GM_xhr_proxy({
         url:"https://"+server+"/namesync/qp.php" + "?" + "t=" + this.thread + "&b=" + this.board, 
         method:'GET', 
         headers:{'X-Requested-With':'NameSync4.9.3-frensync'+g.VERSION+'-archive'},
@@ -433,7 +467,7 @@
       query: function(){
         //get the data from github
         console.log("FS: started the update");
-        return GM_xmlhttpRequest({
+        return GM_xhr_proxy({
           url:"https://raw.githubusercontent.com/OPROSVOs/frensync/main/server/list.json", 
           method:'GET', 
           overrideMimeType:'application/json',
@@ -453,7 +487,7 @@
                }else{console.log('FS: Error fetching the masterserver', msg)}
             },
             onerror: function(msg){console.log('FS: Error fetching the masterserver: XHR error', msg)}
-          });
+          }, 1);
       },
       getServer: function(i){
         return Object.keys(MasterServer.data.server[i])[0];
@@ -468,14 +502,12 @@
             $.add(root, p);
           };
         var q = function(val, srv, i){
-           GM_xmlhttpRequest({
-            url:"https://"+srv+"/namesync/qp.php?b=b&t=" + g.threads, 
+           return GM_xhr_proxy({
+            url:"https://"+srv+"/namesync/qp.php?b="+g.board+"&t=" + g.threads, 
             method:'GET', 
-            headers:{'X-Requested-With':'NameSync4.9.3-frensync'+g.VERSION+'-check'},
+            headers:{'X-Requested-With':'NameSync4.9.3'},
             overrideMimeType:'application/json',
-            responseType: 'json',
             timeout: 8000,
-            anonymous: true,
             onload: function(msg){
                var ref;
                console.log(msg.finalUrl, msg.status, msg.responseText.substring(0, 80));
@@ -497,8 +529,9 @@
           var srv = MasterServer.getServer(i);
           var val = MasterServer.getServerInfo(i);
           try{
-            q(val, srv, i);
+            console.log(q(val, srv, i));
           }catch(e){
+            console.log(e);
             s(" ❌ unknown error, check logs", val, srv, i);
           }
         }
@@ -633,7 +666,8 @@
       if (email) {
         if (emailspan === null) {
           emailspan = $.el('a', {
-            className: 'useremail'
+            className: 'useremail',
+            target: '_new'
           });
           $.before(namespan, emailspan);
         }
@@ -650,8 +684,7 @@
       if (tripcode) {
         if (tripspan === null) {
           tripspan = $.el('span', {
-            className: 'postertrip',
-	    target: '_new'
+            className: 'postertrip'
           });
           $.after(namespan, [$.tn(' '), tripspan]);
         }
@@ -942,28 +975,27 @@
         var val = MasterServer.getServerInfo(i);
         var index = i;
         if (val.qp === false) { continue; }
-        try{
-            //console.log(val, srv, i);
-        
+        try{        
           $.ajax(srv, 'qp', 'GET', "t=" + g.threads + "&b=" + g.board, function(that) {
+            
             var i, len, poster, ref;
-            if (!(that.status === 200 && that.response)) {
-            return;
-            }
+            if (!(that.status === 200 && that.response)) return;
             if (g.view === 'thread') {
-              //TODO :)
-              //console.log("Headers:" , that.responseHeaders.split("\r\n"));
-            //Sync.lastModified = that.getResponseHeaders('Last-Modified') || Sync.lastModified;
+              if(null!=that.responseHeaders){ //if we have headers, save the last modified
+                try{
+                  var headers=that.responseHeaders.split("\r\n");
+                  for(var a in headers){
+                    if(0===headers[a].indexOf("Last-Modified: ")) Sync.lastModified=headers[a].split(": ")[1]||Sync.lastModified
+                  }
+                  //Sync.lastModified = that.getResponseHeaders('Last-Modified') || Sync.lastModified; //not working
+                }catch(e){}
+              }
             }
-            var ref;
             try {
-            ref = JSON.parse(that.response);
-            }catch(e){
-              // console.log(e); //error expected
-              return;
-            }
+              ref = JSON.parse(that.response);
+            }catch(e){console.log("error parsing json from ", srv);return;}
             var trace = Set['Show origin'];
-            var origin = that.finalUrl.substr(8,3); // finalUrl not responseURL
+            var origin = (((that.responseURL)?that.responseURL:'')+((that.finalUrl)?that.finalUrl:'')).substr(8,3); // finalUrl or responseURL whatever
             Main.detectBgColor();
             for (j = 0, len = ref.length; j < len; j++) {
               var fresh = ref[j];

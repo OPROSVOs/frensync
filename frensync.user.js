@@ -32,7 +32,7 @@
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.2.2',
+    VERSION: '0.2.5',
     MsApi: '1',
     posts: {},
     threads: [],

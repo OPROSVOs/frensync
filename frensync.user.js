@@ -394,7 +394,7 @@
         if(str.match(/^(javascript|chrome-extension):/i) !== null){ //block the low effort trolls
             return 'unsafe:' + str;   
         }
-        if(str.match(/^(https?|ftp):[\\\/]{2,4}[^\s\/$.?#].[^\s]*$/i) === null){//assume not a link
+        if(str.match(/^(https?|ftp):[\\\/]{2,4}[^\s\/\\$.?#].[^\s]*$/i) === null){//assume not a link
           if(str.match(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/) !== null){ //assume email
             if(str.match(/^(attachment|sender|cc:|bcc:|replay-to:)/i) !== null){return 'unsafe:mailto:' + str;} //Sending potentional dangerous files as email attachment links
             return 'mailto:' + str;
@@ -487,7 +487,7 @@
                }else{console.log('FS: Error fetching the masterserver', msg)}
             },
             onerror: function(msg){console.log('FS: Error fetching the masterserver: XHR error', msg)}
-          }, 1);
+          });
       },
       getServer: function(i){
         return Object.keys(MasterServer.data.server[i])[0];

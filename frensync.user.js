@@ -210,7 +210,7 @@
       'Sync on /s4s/': [true, 'Enable sync on /s4s/. (Disabled)'],
       'Sync on /trash/': [true, 'Enable sync on /trash/.'],
      // 'Custom Names': [false, 'Posters can be given custom names.'], // Broken because no uID for you
-      'Read-only Mode': [false, 'Share none of your sync fields (reload after change).'],
+      'Read-only Mode': [false, 'Share none of your sync fields.'],
       'Hide Sage': [false, 'Share none of your sync fields when sage is in the email field.'],
       'Mark Sync Posts': [false, 'Mark posts made by sync users.'],
       'Do Not Track': [false, 'Request no sync field tracking by third party archives.'],
@@ -860,7 +860,7 @@
       
       field = $.el('fieldset');
       $.add(field, $.el('legend', {
-        textContent: 'Main (settings require reload to apply)'
+        textContent: 'Main (settings apply without reloading)'
       }));
       ref = Config.main;
       for (setting in ref) {

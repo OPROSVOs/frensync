@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.2.5
+// @version      0.2.6
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -32,7 +32,7 @@
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.2.5',
+    VERSION: '0.2.6',
     MsApi: '1',
     posts: {},
     threads: [],
@@ -127,16 +127,15 @@
   };
   
   GM_xhr_proxy=function(p){
-    console.log(p);
     if(    "function"==typeof GM_xmlhttpRequest)return GM_xmlhttpRequest(p); //ViolentMonkey, TamperMonkey
     if(GM&&"function"==typeof GM.xmlHttpRequest)return GM.xmlHttpRequest(p); //GreaseMonkeys new API
     return false;
   };
- 
+  
   $.ajax = function(srv, file, type, data, onload, onerror) {
     //one way gives the xhr as "param", the other as "this" and the other as "param.target"; this one unifies it to param
-    var onload_proxy =function(t){return this.status&&(t=this),t.target?onload(t.target):((null!=onload)?onload(t):false)}; 
-    var onerror_proxy=function(r){return this.status&&(r=this),null!=onerror?onerror(r):false}; //same as above
+    var onload_proxy =function(t){return this.status&&(t=this),t.target?onload(t.target):((null!=onload)?onload(t):false);}; 
+    var onerror_proxy=function(r){return this.status&&(r=this),null!=onerror?onerror(r):false;}; //same as above
     var client = ((srv == 'namesync.net')?'NameSync4.9.3':'NameSync4.9.3-Frensync'+g.VERSION);
 	  if(Set['GM_API XHR']){
       // extension XHR:
@@ -193,6 +192,7 @@
   };
 
   $.set = function(name, value) {
+    Set[name] = value;
     return localStorage.setItem("" + g.NAMESPACE + name, value);
   };
   
@@ -235,6 +235,8 @@
       //To avoid more clutter this is just in fixed order and just a check or cross.
       //A cross means that the server has no data either because the user didn't sync to there or the server has an fault or this client fails to get the server data
       'Show origin': [false, 'DEBUG: Show the sync source. Order: Frensync, NamesyncRedux, Namesync original'],
+      
+      //'LOG': [false, 'DEBUG: Fill the console with lots of stuff for debugging (slow); leave it off'],
       
     },
     other: {
@@ -370,7 +372,8 @@
           MasterServer.init();
         }catch(e){console.log("Failed updating the server list", e);}
         Posts.init();
-        return Sync.init();
+        Sync.init();
+        console.log("FS: init done");
       }
     },
     boardLegit: function() {
@@ -425,27 +428,31 @@
       },
       parse: function(){
         //load data to glob
-        MasterServer.data.done = false;
+        /*
+         * MasterServer.data.done = false;
         var sl = $.get("Serverlist");
         var o;
         if(typeof sl == undefined || sl == null || sl.length < 1){console.log("FS: Serverlist is empty!"); sl = MasterServer.saneDefaults(1);}
         try{o = JSON.parse(sl)}catch(e){console.log("FS: crtitcal error: could not read the serverlist"); o = JSON.parse(MasterServer.saneDefaults(1)); }
         MasterServer.data = o;
-        console.log("FS: MasterServer parsed:", o);
+        */
+        MasterServer.data = JSON.parse('{"server":[{"namesync.net":{"name":"namesync original","sp":true,"qp":true,"prio":["t"]}},{"m8q16hakamiuv8ch.myfritz.net":{"name":"frensync backup","sp":true,"qp":true}},{"nsredux.com":{"name":"Namesync Redux","sp":true,"qp":true}}],"revisit":86400,"api":1}');
         MasterServer.data.done = true;
       },
       saneDefaults: function(override){
-        var srv = $.get("Serverlist");
+        /*var srv = $.get("Serverlist");
         if(typeof srv == undefined || srv == null || srv.length < 1 || override == 1 ){ 
           console.log("FS: Fallback to defaults");
-          var defaults = '{"server":[{"namesync.net":{"sp":true,"qp":true}},{"nsredux.com":{"sp":true,"qp":true}},{"m8q16hakamiuv8ch.myfritz.net":{"sp":true,"qp":true}}],"revisit":43200}';
+          var defaults = '{"server":[{"namesync.net":{"sp":true,"qp":true}},{"nsredux.net":{"sp":true,"qp":true}},{"m8q16hakamiuv8ch.myfritz.net":{"sp":true,"qp":true}}],"revisit":43200}';
           $.set("Serverlist", defaults);
           $.set("Serverlist-last-check", "2");
           return defaults;
         }
+        */
       },
       check: function(){
         //date compare, integry
+        /*
         var then = $.get("Serverlist-last-check");
         var set = function(){$.set("Serverlist-last-check", (new Date().getTime())); then= new Date().getTime()}
         var srv = $.get("Serverlist");
@@ -462,11 +469,11 @@
           MasterServer.query();
         }else{
           console.log("FS: serverlist probably up to date");
-        }
+        }*/
       },
       query: function(){
         //get the data from github
-        console.log("FS: started the update");
+        /*console.log("FS: started the update");
         return GM_xhr_proxy({
           url:"https://raw.githubusercontent.com/OPROSVOs/frensync/main/server/list.json", 
           method:'GET', 
@@ -487,7 +494,7 @@
                }else{console.log('FS: Error fetching the masterserver', msg)}
             },
             onerror: function(msg){console.log('FS: Error fetching the masterserver: XHR error', msg)}
-          });
+          });*/
       },
       getServer: function(i){
         return Object.keys(MasterServer.data.server[i])[0];
@@ -529,7 +536,7 @@
           var srv = MasterServer.getServer(i);
           var val = MasterServer.getServerInfo(i);
           try{
-            console.log(q(val, srv, i));
+            q(val, srv, i);
           }catch(e){
             console.log(e);
             s(" ❌ unknown error, check logs", val, srv, i);
@@ -905,6 +912,20 @@
       $.on(ca, 'change', c);
       $.on(ch, 'change', c);
       c('');
+      
+      /*
+       * watchSettings = function(e) {
+        if ((input = $.getOwn(inputs, e.target.name))) {
+          input.checked = e.target.checked;
+          return $.event('change', null, input);
+        }
+      };
+      $.on(d, 'OpenSettings', function() {
+        return $.on($.id('fourchanx-settings'), 'change', watchSettings);
+      });
+      */
+ 
+      
       return $('div[id$="x-settings"] nav').style.visibility = 'hidden';
     }
   };
@@ -1180,12 +1201,16 @@
     },
     clear: function() {
       
+      if (confirm("This nukes all site data (incl. tripcode fields) and your posts, ARE YOU SURE??\n Server side not fully implemented") == true) {
+        localStorage.clear();
+        $('#syncClear').disabled = true;
+        
+      } else {
+        return;
+      }
       
-      alert("To be implemented");//TODO
       
-      
-      $('#syncClear').disabled = true;
-	  this.NSserver = (parseInt($.get('NSserver'))) || 'namesync.net,m8q16hakamiuv8ch.myfritz.net';
+	  this.NSserver = (parseInt($.get('NSserver'))) || 'namesync.net,nsredux.com,m8q16hakamiuv8ch.myfritz.net';
 	  this.NSserver.split(',').forEach(function(server){
 		  return $.ajax(server, 'rm', 'POST', '', 
       function() { //onload

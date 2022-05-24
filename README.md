@@ -28,6 +28,8 @@ Currently working client:
 * Sends/receives both to/from Namesync and the backup in a crude way
 * multi server works in the archive
 * added name color support
+* fixed the bug where one has to reload to apply the settings
+* workarounds for misconfigured ad/script-blockers
 
 Tests:
 * Firefox 100 - OK
@@ -38,14 +40,16 @@ Tests:
 * TamperMonkey - OK (causes permission popups)
 * GreaseMonkey  - OK (differences in API but working)
 * 4chanX  - OK
-* AppchanX - Broken (Captcha broken, no color support)
+* AppchanX - Broken? (Captcha broken, no color support)
 
 Todos:
 * Detect multi instances 
-* Implement multi server and merge names
-* Test with other servers ([NSredux](https://github.com/iBoonie/namesyncredux))
-* Some settings don't apply without reloading after (read-only, persona), needs testing
-* qp.php: Delete data after some time
-
+* ~~Implement multi server and merge names~~ done
+* ~~Test with other servers ([NSredux](https://github.com/iBoonie/namesyncredux))~~ done
+* ~~Some settings don't apply without reloading after (read-only, persona), needs testing~~ done
+* qp.php rm.php: Delete data after some time
+* cleanup tha master server list thing as this is not changing anytime
+* validate timestamps with post timestamps
+* cleanup
 
 

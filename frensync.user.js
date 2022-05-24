@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.2.2
+// @version      0.2.5
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -438,7 +438,7 @@
         var srv = $.get("Serverlist");
         if(typeof srv == undefined || srv == null || srv.length < 1 || override == 1 ){ 
           console.log("FS: Fallback to defaults");
-          var defaults = '{"server":[{"namesync.net":{"sp":true,"qp":true}},{"m8q16hakamiuv8ch.myfritz.net":{"sp":true,"qp":true}}],"revisit":43200}';
+          var defaults = '{"server":[{"namesync.net":{"sp":true,"qp":true}},{"nsredux.com":{"sp":true,"qp":true}},{"m8q16hakamiuv8ch.myfritz.net":{"sp":true,"qp":true}}],"revisit":43200}';
           $.set("Serverlist", defaults);
           $.set("Serverlist-last-check", "2");
           return defaults;

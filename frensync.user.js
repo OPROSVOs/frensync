@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.2.6
+// @version      0.2.7
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -23,12 +23,12 @@
 // ==/UserScript==
 
 (function() {
-  var $, $$, CSS, Config, Filter, Main, Post, Posts, Set, MasterServer, Settings, Sync, d, g, GM_xhr_proxy,
+  var $, $$, CSS, Config, Filter, NameFetch, Main, Post, Posts, Set, MasterServer, Settings, Sync, d, g, GM_xhr_proxy,
     indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   Set = {};
 
-  d = document; 
+  d = document;
 
   g = {
     NAMESPACE: 'frensync',
@@ -125,16 +125,16 @@
     }
     return frag;
   };
-  
+
   GM_xhr_proxy=function(p){
-    if(    "function"==typeof GM_xmlhttpRequest)return GM_xmlhttpRequest(p); //ViolentMonkey, TamperMonkey
+    if("function"==typeof GM_xmlhttpRequest)return GM_xmlhttpRequest(p); //ViolentMonkey, TamperMonkey
     if(GM&&"function"==typeof GM.xmlHttpRequest)return GM.xmlHttpRequest(p); //GreaseMonkeys new API
     return false;
   };
-  
+
   $.ajax = function(srv, file, type, data, onload, onerror) {
     //one way gives the xhr as "param", the other as "this" and the other as "param.target"; this one unifies it to param
-    var onload_proxy =function(t){return this.status&&(t=this),t.target?onload(t.target):((null!=onload)?onload(t):false);}; 
+    var onload_proxy =function(t){return this.status&&(t=this),t.target?onload(t.target):((null!=onload)?onload(t):false);};
     var onerror_proxy=function(r){return this.status&&(r=this),null!=onerror?onerror(r):false;}; //same as above
     var client = ((srv == 'namesync.net')?'NameSync4.9.3':'NameSync4.9.3-Frensync'+g.VERSION);
 	  if(Set['GM_API XHR']){
@@ -145,29 +145,29 @@
         method:((type === 'GET')?'GET':'POST'),
         overrideMimeType:'application/json',
         headers: {
-          "X-Requested-With": client,  
-          "If-Modified-Since": Sync.lastModified,         
+          "X-Requested-With": client,
+          "If-Modified-Since": Sync.lastModified,
           "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-          "Origin": location.protocol + '//' + location.hostname 
+          "Origin": location.protocol + '//' + location.hostname
         },
         onload:onload_proxy,
         onerror:onerror_proxy
       });
-    }else{ 
+    }else{
       // regular XHR:
       var r = new XMLHttpRequest();
       if (file === 'qp') r.overrideMimeType('application/json');
       var url = "https://" + srv + "/namesync/" + file + ".php";
       if (type === 'GET') url += "?" + data;
       r.open(type, url, true);
-      r.setRequestHeader('X-Requested-With', client); 
+      r.setRequestHeader('X-Requested-With', client);
       if (file === 'qp') r.setRequestHeader('If-Modified-Since', Sync.lastModified);
       if (type === 'POST') r.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
       r.onloadend=onload_proxy;
-      r.onerror=onerror_proxy;  
+      r.onerror=onerror_proxy;
       r.withCredentials = true;
       r.send(data);
-      return r; 
+      return r;
     }
   };
 
@@ -195,7 +195,7 @@
     Set[name] = value;
     return localStorage.setItem("" + g.NAMESPACE + name, value);
   };
-  
+
   $.calcColor = function(ch, ca){
     if(Main.brightness == null){return "";}
     if(ch == null || ch < 0 || ch > 360){ch=0;}
@@ -210,34 +210,34 @@
       'Sync on /s4s/': [true, 'Enable sync on /s4s/. (Disabled)'],
       'Sync on /trash/': [true, 'Enable sync on /trash/.'],
      // 'Custom Names': [false, 'Posters can be given custom names.'], // Broken because no uID for you
-      'Read-only Mode': [false, 'Share none of your sync fields.'],
+      'Read-only Mode': [false, 'Share none of your sync fields (reload after change).'],
       'Hide Sage': [false, 'Share none of your sync fields when sage is in the email field.'],
       'Mark Sync Posts': [false, 'Mark posts made by sync users.'],
       'Do Not Track': [false, 'Request no sync field tracking by third party archives.'],
      // 'Do Not Track TFF': [false, 'Request to not show fields in a manner that shows what thread is active.'], // Not implemented
-      
+
       'Colors': [true, 'Show name colors when available.'],
-      
-      // unchecked: just show a regular mailto: link while 
-      // checked: try to guess a if its a link or text and do the best. 
+
+      // unchecked: just show a regular mailto: link while
+      // checked: try to guess a if its a link or text and do the best.
       'Smart email': [true, 'Try to find out what content in in there if its not an email (discord, links).'],
-      
+
       //This shows a green circle next to the thread icons on the catalog if theres some synced post inside or if OP is using NS
       //4chan in addition to cutting the fields also hides the subject in the default style so this is a way to see that there is something missing
       'Mark OP': [true, 'Mark the OP in catalog if OP is a namefag or theres a namefag inside '],
-      
+
       //Regular XHRs run with the site traffic and any CORS problem or scriptblocker problem or Adblock problem will cause issues
-      //Having them routed over the extension goes around all this but each extension has a different version of the GM_API. 
+      //Having them routed over the extension goes around all this but each extension has a different version of the GM_API.
       //The newer ones use a different naming and this might cause problems.
       'GM_API XHR': [true, 'DEBUG: Route data over a side channel to prevent CORS, Adblock & Scriptblock issues'],
-      
+
       //Shows markers from which server a post got sync data
       //To avoid more clutter this is just in fixed order and just a check or cross.
       //A cross means that the server has no data either because the user didn't sync to there or the server has an fault or this client fails to get the server data
       'Show origin': [false, 'DEBUG: Show the sync source. Order: Frensync, NamesyncRedux, Namesync original'],
-      
+
       //'LOG': [false, 'DEBUG: Fill the console with lots of stuff for debugging (slow); leave it off'],
-      
+
     },
     other: {
       'Persona Fields': [false],
@@ -287,10 +287,10 @@
         NameFetch.query(MasterServer.getServer(1), function(){console.log('FS: giving up');});
       });
     },
-    query: function(server,  errCall) {
+    query: function(server, errCall) {
       return GM_xhr_proxy({
-        url:"https://"+server+"/namesync/qp.php" + "?" + "t=" + this.thread + "&b=" + this.board, 
-        method:'GET', 
+        url:"https://"+server+"/namesync/qp.php?t=" + this.thread + "&b=" + this.board,
+        method:'GET',
         headers:{'X-Requested-With':'NameSync4.9.3-frensync'+g.VERSION+'-archive'},
         overrideMimeType:'application/json',
         responseType: 'json',
@@ -300,14 +300,14 @@
              var ref;
              if(msg.status == 200 && msg.responseText && msg.responseText.length){
                 try{ref = JSON.parse(msg.responseText);}catch(e){console.log("FS: invalid json", e);errCall()}
-                if(ref){NameFetch.contentHandle(ref);console.log('FS: Success');}          
+                if(ref){NameFetch.contentHandle(ref);console.log('FS: Success');}
              }
           },
           onerror: function(msg){console.log('FS: Got an error', msg);errCall()}
       })
     },
-    contentHandle: function(ref){ 
-      for (i = 0, len = ref.length; i < len; i++) {
+    contentHandle: function(ref){
+      for (var i = 0, len = ref.length; i < len; i++) {
         var post = d.getElementById(ref[i].p);
         if (post) {
           if (typeof ref[i].n != null || typeof ref[i].t != null || typeof ref[i].e != null) {
@@ -327,20 +327,14 @@
           }
           if (typeof ref[i].ca != null && typeof ref[i].ch != null && ref[i].ca !== "" && ref[i].ch !== "" && ref[i].ca > 0 && Set['Colors']) {
             var str = $.calcColor(ref[i].ch, ref[i].ca);
-            //console.log(str);
             $('.post_tripcode', post).style.color=str;
-            $('.post_author',   post).style.color=str;
+            $('.post_author', post).style.color=str;
           }
         }
       }
     }
   };
-  
-  
 
-  
-  
-  
   Main = {
     DOMinit: function() {
       if(window.location.href.indexOf("archived.moe") !== -1 || window.location.href.indexOf("desuarchive.org") !== -1){
@@ -391,11 +385,11 @@
       }catch(e){console.log(e);}
       Main.brightness = yiq;
       return yiq;
-    },    
+    },
     handleEmailLink: function(str) {
       if(Set['Smart email']){
         if(str.match(/^(javascript|chrome-extension):/i) !== null){ //block the low effort trolls
-            return 'unsafe:' + str;   
+            return 'unsafe:' + str;
         }
         if(str.match(/^(https?|ftp):[\\\/]{2,4}[^\s\/\\$.?#].[^\s]*$/i) === null){//assume not a link
           if(str.match(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/) !== null){ //assume email
@@ -405,7 +399,7 @@
             if(str.match(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/i) !== null){//phone number...
               return 'tel:' + str;
             }//do nothing. cant differentiate between telegram and twitter and discord only supports invites
-            return str; 
+            return str;
           }
         }else{
           return str; //do nothing if its already a link
@@ -415,9 +409,7 @@
       }
     }
   };
-  
 
-  
     MasterServer = {
       data:{},
       init: function(){
@@ -441,7 +433,7 @@
       },
       saneDefaults: function(override){
         /*var srv = $.get("Serverlist");
-        if(typeof srv == undefined || srv == null || srv.length < 1 || override == 1 ){ 
+        if(typeof srv == undefined || srv == null || srv.length < 1 || override == 1 ){
           console.log("FS: Fallback to defaults");
           var defaults = '{"server":[{"namesync.net":{"sp":true,"qp":true}},{"nsredux.net":{"sp":true,"qp":true}},{"m8q16hakamiuv8ch.myfritz.net":{"sp":true,"qp":true}}],"revisit":43200}';
           $.set("Serverlist", defaults);
@@ -463,7 +455,7 @@
         var recheck = MasterServer.data.revisit || '250000';
         console.log("FS: recheck: ", recheck, (recheck-diff));
         if(diff < 0){set(); return;}
-        if(diff > recheck){ 
+        if(diff > recheck){
           console.log("FS: updating serverlist");
           set();
           MasterServer.query();
@@ -475,8 +467,8 @@
         //get the data from github
         /*console.log("FS: started the update");
         return GM_xhr_proxy({
-          url:"https://raw.githubusercontent.com/OPROSVOs/frensync/main/server/list.json", 
-          method:'GET', 
+          url:"https://raw.githubusercontent.com/OPROSVOs/frensync/main/server/list.json",
+          method:'GET',
           overrideMimeType:'application/json',
           responseType: 'json',
           timeout: 30000,
@@ -490,7 +482,7 @@
                       $.asap(function(){return (MasterServer.data.done != false)}, function(){$.set("Serverlist", JSON.stringify(ref));MasterServer.parse()});
                       console.log('FS: update success');
                     }
-                  }catch(e){console.log("FS: masterserver invalid json", e)}          
+                  }catch(e){console.log("FS: masterserver invalid json", e)}
                }else{console.log('FS: Error fetching the masterserver', msg)}
             },
             onerror: function(msg){console.log('FS: Error fetching the masterserver: XHR error', msg)}
@@ -503,15 +495,15 @@
         return MasterServer.data.server[i][MasterServer.getServer(i)];
       },
       checkAvail: function(root){
-        var s   = function(txt, val, srv, i){
+        var s = function(txt, val, srv, i){
             var p = $.el('p' , {id: 'availRoot'+i});
             p.textContent = (val.name || srv) + ': ' + txt;
             $.add(root, p);
           };
         var q = function(val, srv, i){
            return GM_xhr_proxy({
-            url:"https://"+srv+"/namesync/qp.php?b="+g.board+"&t=" + g.threads, 
-            method:'GET', 
+            url:"https://"+srv+"/namesync/qp.php?b="+g.board+"&t=" + g.threads,
+            method:'GET',
             headers:{'X-Requested-With':'NameSync4.9.3'},
             overrideMimeType:'application/json',
             timeout: 8000,
@@ -544,10 +536,7 @@
         }
       }
     };
-  
 
-  
-  
     Posts = {
     nameByPost: {},
     nameByID: {},
@@ -641,11 +630,9 @@
       subjectspan = this.nodes.subject;
       tripspan = $('.postertrip', this.nodes.info);
       emailspan = $('.useremail', this.nodes.info);
-      
       if(Set['Show origin'] && oinfo != null) {
           subject ="[" + ((oinfo.m8q)?"✔️":"❌")+((oinfo.nsr)?"✔️":"❌")+((oinfo.nam)?"✔️":"❌") + "]"+ (subject||"") ;
       }
-      
       //mark thread
       if(Set['Mark OP'] && oinfo != null && oinfo.m === true) {
         if($('.sync-marker-icon', this.nodes.root) == null){
@@ -657,7 +644,6 @@
           $.add($('.catalog-icons', this.nodes.root), markerspan);
         }
       }
-      
       if (namespan.textContent !== name) {
         namespan.textContent = name;
       }
@@ -718,9 +704,7 @@
         subjectspan&&(subjectspan.style.opacity='0.75');
         namespan&&(namespan.style.opacity='0.05');
         tripspan&&(tripspan.style.opacity='0.05');
-           
       }
-      
       if (Set['Mark Sync Posts'] && this.isReply && Posts.nameByPost[this.ID]) {
         $.addClass(this.nodes.post, 'sync-post');
       }
@@ -741,14 +725,13 @@
         }
       }
     }
- /*     
+ /*
   * BROKEN: because there is no uID
   * Todo: add uid to JSON?
-  * 
+  *
       ,
     customName: function(uID) {
       var n;
-      
       console.log(uID, Posts.nameByID[uID]);
       if (!(n = prompt('Custom Name', 'Anonymous'))) {
         return;
@@ -805,7 +788,7 @@
   <div>
     	<input type=text name=Name placeholder=Name>
     	<input type=text name=Email placeholder=Email>
-    	<input type=text name=Subject placeholder=Subject>		
+    	<input type=text name=Subject placeholder=Subject>
       <input type=text name=ColorPreview value='Color:' placeholder='color:' readonly=readonly style='width:35px;border:0'>
 		  <input type=number name=ColorAmount placeholder=0 value=0 min=0 max=50 step=1 style='width:50px'  title='How much color shall it be (0-50)? Depends on dark/bright theme'>
 		  <input type=number name=ColorHue placeholder=0 value=0 min=0 max=360 step=10 style='width:50px' title='Hue (0-360)'>
@@ -854,13 +837,9 @@
   	</div>
 </fieldset>
       `;
-      
-
-      
-      
       field = $.el('fieldset');
       $.add(field, $.el('legend', {
-        textContent: 'Main (settings apply without reloading)'
+        textContent: 'Main (settings require reload to apply)'
       }));
       ref = Config.main;
       for (setting in ref) {
@@ -898,13 +877,11 @@
           return $.set(this.name, this.value);
         });
       }
-      
-      MasterServer.checkAvail($('#availRoot',  section));
-      
-      $.on($('#syncClear',  section), 'click', Sync.clear);//TODO
+      MasterServer.checkAvail($('#availRoot', section));
+      $.on($('#syncClear', section), 'click', Sync.clear);//TODO
       var pr=$('input[Name=ColorPreview]', section);
-      var ca=$('input[Name=ColorAmount]',  section);
-      var ch=$('input[Name=ColorHue]',     section);
+      var ca=$('input[Name=ColorAmount]', section);
+      var ch=$('input[Name=ColorHue]', section);
       var c= function(e) {
         pr.style.backgroundColor=((1<=ca.value)?($.calcColor(ch.value,ca.value)):"");
         if(e=='change'){$.set('ca', ca.value);$.set('ch', ch.value);}
@@ -912,7 +889,6 @@
       $.on(ca, 'change', c);
       $.on(ch, 'change', c);
       c('');
-      
       /*
        * watchSettings = function(e) {
         if ((input = $.getOwn(inputs, e.target.name))) {
@@ -924,8 +900,6 @@
         return $.on($.id('fourchanx-settings'), 'change', watchSettings);
       });
       */
- 
-      
       return $('div[id$="x-settings"] nav').style.visibility = 'hidden';
     }
   };
@@ -985,20 +959,14 @@
       if (g.threads.length === 0) {
         return;
       }
-      
-      
-      
-      
-      
       var len, i;
       for (i = 0, len = MasterServer.data.server.length; i < len; i++) {
         var srv = MasterServer.getServer(i);
         var val = MasterServer.getServerInfo(i);
         var index = i;
         if (val.qp === false) { continue; }
-        try{        
+        try{
           $.ajax(srv, 'qp', 'GET', "t=" + g.threads + "&b=" + g.board, function(that) {
-            
             var i, len, poster, ref;
             if (!(that.status === 200 && that.response)) return;
             if (g.view === 'thread') {
@@ -1014,38 +982,34 @@
             }
             try {
               ref = JSON.parse(that.response);
-            }catch(e){console.log("error parsing json from ", srv);return;}
+            }catch(e){console.log("error parsing json");return;}
             var trace = Set['Show origin'];
             var origin = (((that.responseURL)?that.responseURL:'')+((that.finalUrl)?that.finalUrl:'')).substr(8,3); // finalUrl or responseURL whatever
             Main.detectBgColor();
-            for (j = 0, len = ref.length; j < len; j++) {
+            for (var j = 0, l = ref.length; j < l; j++) {
               var fresh = ref[j];
               var stale = Posts.nameByPost[ref[j].p];
               /*if(stale['p'] != null && fresh['p'] != null && stale['p'] == fresh['p']){
                 console.log("skipped");
                 continue;
               } // Doesnt work for deletes */
-              
               if(stale === undefined){stale = {}}
-              for (var a in fresh) {
-                if(stale[a] != null && fresh[a] != null){
-                  if(stale[a].length != fresh[a].length){
-                    if(fresh[a].length < stale[a].length && fresh[a].length > 0){
-                      stale[a] = fresh[a]; //update if shorter
+              for (var b in fresh) {
+                if(stale[b] != null && fresh[b] != null){
+                  if(stale[b].length != fresh[b].length){
+                    if(fresh[b].length < stale[b].length && fresh[b].length > 0){
+                      stale[b] = fresh[b]; //update if shorter
                     }
                   }
                 }
                 //not for trips that are set or empty variables
-                if((a != 't' && stale[a] == null) || stale[a] == null){stale[a] = fresh[a]} 
+                if((b != 't' && stale[b] == null) || stale[b] == null){stale[b] = fresh[b]}
               }
               if(trace){
                 stale[origin] = 1;
               }
               Posts.nameByPost[ref[j].p] = stale;
-              
             }
-            
-            
             Posts.updateAllPosts();
             return $.event('NamesSynced');
           }
@@ -1085,13 +1049,7 @@
 			}
 		  });
 	  });*/
-      
-      
-      
-      
-      
-      
-      
+
       if (repeat && g.view === 'thread' && !Sync.disabled) {
         return setTimeout(Sync.sync, 30000, true);
       }
@@ -1134,29 +1092,17 @@
       return Sync.send(currentName, currentEmail, currentSubject, postID, threadID);
     },
     send: function(name, email, subject, postID, threadID, retryTimer) {
-	  var r;
-      
-      
-      
-      
-	 // this.NSserver = (parseInt($.get('NSserver'))) || 'namesync.net,m8q16hakamiuv8ch.myfritz.net';
-	 // this.NSserver.split(',').forEach(function(server){
     var len, i;
     for (i = 0, len = MasterServer.data.server.length; i < len; i++) {
       var srv = MasterServer.getServer(i);
       var val = MasterServer.getServerInfo(i);
       if (val.sp === false) { continue; }
-      try{ 
-      
-      
+      try{
           var col = "&ca=" + parseInt($.get("ColorAmount"))+ "&ch=" + parseInt($.get("ColorHue"));
           var ident = "&n=" + (encodeURIComponent(name)) + "&s=" + (encodeURIComponent(subject)) + "&e=" + (encodeURIComponent(email));
-           if(srv == "namesync.net"){col = "";} //the server returns still an error 500... maybe the requested_with
-        
+          if(srv == "namesync.net"){col = "";} //the server returns still an error 500... maybe the requested_with
           var params = "p=" + postID + "&t=" + threadID + "&b=" + g.board + ident + "&dnt=" + (Set['Do Not Track'] ? '1' : '0') + col;
-        
-          var r = $.ajax(srv, 'sp', 'POST', params , function(that){// no onload callback 
-            //console.log("post xhr ok", that);
+          var r = $.ajax(srv, 'sp', 'POST', params , function(that){// no onload callback
           }, function(that) {//onerror callback
           if (!Sync.canRetry) {
             return;
@@ -1183,36 +1129,24 @@
           }
           retryTimer += retryTimer < 5000 ? 2000 : 5000;
           return setTimeout(Sync.send, retryTimer, name, email, subject, postID, threadID, retryTimer);
-        }
-        );
-      
-
-      
-      
-      
-	    //});
+        });
       }catch(e){
             console.log("FS: sp error", val, srv, e);
         }
       }
 
-      
 	  return r; /*return any; its async anyway*/
     },
     clear: function() {
-      
       if (confirm("This nukes all site data (incl. tripcode fields) and your posts, ARE YOU SURE??\n Server side not fully implemented") == true) {
         localStorage.clear();
         $('#syncClear').disabled = true;
-        
       } else {
         return;
       }
-      
-      
 	  this.NSserver = (parseInt($.get('NSserver'))) || 'namesync.net,nsredux.com,m8q16hakamiuv8ch.myfritz.net';
 	  this.NSserver.split(',').forEach(function(server){
-		  return $.ajax(server, 'rm', 'POST', '', 
+		  return $.ajax(server, 'rm', 'POST', '',
       function() { //onload
 			  if (this.status !== 200) {
 				return;
@@ -1224,25 +1158,10 @@
 	  });
     }
   };
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   $.on(d, '4chanXInitFinished', Main.init);
   $.on(window, 'DOMContentLoaded', Main.DOMinit);
-  
-  
-  
-  
-  
-  
-  
-  
+
   Post = (function() {
     Post.prototype.toString = function() {
       return this.ID;

@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.2.7
+// @version      0.2.8
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -32,7 +32,7 @@
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.2.6',
+    VERSION: '0.2.8',
     MsApi: '1',
     posts: {},
     threads: [],
@@ -791,7 +791,7 @@
     	<input type=text name=Subject placeholder=Subject>
       <input type=text name=ColorPreview value='Color:' placeholder='color:' readonly=readonly style='width:35px;border:0'>
 		  <input type=number name=ColorAmount placeholder=0 value=0 min=0 max=50 step=1 style='width:50px'  title='How much color shall it be (0-50)? Depends on dark/bright theme'>
-		  <input type=number name=ColorHue placeholder=0 value=0 min=0 max=360 step=10 style='width:50px' title='Hue (0-360)'>
+		  <input type=number name=ColorHue placeholder=0 value=0 min=0 max=359 step=5 style='width:50px' title='Hue (0-359)'>
   </div>
 </fieldset>
 <fieldset>

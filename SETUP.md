@@ -66,18 +66,29 @@ TLDR: A way around using an account with user/pass.
 Basically the output of an hash / one way math function so scammy people have a harder time inpersonating you. After your name add a # followed by some secret 10 characters. These will not be displayed but will generate a different text. It is difficult to get your secret 10 characters from that output and hinders people just writing your name into their fields to impersonate you. 
 For better visibility / fun that generated output can partly have some letters of your choice in it. See [Meriken's Tripcode Engine](https://github.com/meriken/merikens-tripcode-engine-v3)
 
-### The extension throws an error: localstorage get failed / localstorage access denied / ns-error-file-corrupted
+### The extension throws an error: localstorage get failed / localstorage access denied / ns-error-file-corrupted / NS_ERROR_FAILURE 
+When pressing F12 there is NS_ERROR_FAILURE all over in the console.
 That means that the extension can't access its own settings to store the name and checkboxes.
 This is due to an **corrupted browser profile** which crashes some api calls from the extension.
 Either run checkdisk/chkdsk on the drive or delete the broken profile. You also might want to keep an eye on that drive as it might be broken soon.
+A quick fix is Settings -> Privacy -> Delete cookies and website data
 
 ### Sync works only to one server
 Check your adblock / ublock settings and filters.
+
 Make sure you have the upper exceptions in your ruleset.
+
+Try checking the GM_API XHR checkbox, reload and see if it works. 
+Then leave it unchecked and reload for further debugging.
+
+### The console shows "... has been blocked permanently by the user" while using TamperMonkey
+The console can be accessed by pressing F12. This error results that certain servers are unreachable.
+Check the XHR security tab in the script settings. There should be all just * and nothing blocked.
 
 ### Things don't work / Kittens are dying
 If the extension doesn't work as intended, first check this:
 - Only one user script extension (like tampermonkey) is running and working
+- In TamperMonkey  Script->Settings->XHR Security where should be just * and nothing is blocked.
 - 4chanX is running and working
 - There is one FS in the corner, nothing else and its the newest version
 - The server status in the control panel shows green ticks, no red cross

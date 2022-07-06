@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.2.8
+// @version      0.2.9
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -23,7 +23,7 @@
 // ==/UserScript==
 
 (function() {
-  var $, $$, CSS, Config, Filter, NameFetch, Main, Post, Posts, Set, MasterServer, Settings, Sync, d, g, GM_xhr_proxy,
+  var $, $$, CSS, Config, Filter, NameFetch, Main, Post, Posts, Set, API, MasterServer, Settings, Sync, d, g, GM_xhr_proxy,
     indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   Set = {};
@@ -32,7 +32,7 @@
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.2.8',
+    VERSION: '0.2.9',
     MsApi: '1',
     posts: {},
     threads: [],
@@ -135,7 +135,7 @@
   $.ajax = function(srv, file, type, data, onload, onerror) {
     //one way gives the xhr as "param", the other as "this" and the other as "param.target"; this one unifies it to param
     var onload_proxy =function(t){return this.status&&(t=this),t.target?onload(t.target):((null!=onload)?onload(t):false);};
-    var onerror_proxy=function(r){return this.status&&(r=this),null!=onerror?onerror(r):false;}; //same as above
+    var onerror_proxy=function(r){console.log(r);return this.status&&(r=this),null!=onerror?onerror(r):false;}; //same as above
     var client = ((srv == 'namesync.net')?'NameSync4.9.3':'NameSync4.9.3-Frensync'+g.VERSION);
 	  if(Set['GM_API XHR']){
       // extension XHR:
@@ -334,6 +334,33 @@
       }
     }
   };
+  
+  //A small interface for helper scripts
+  API = {
+    API_VERSION: 1,
+    init: function(){d.frensync = this},
+    
+    //=== Helper ===
+    DetectBgColor: function(){Main.detectBgColor},
+    CalcColor: function(ca, ch){$.calcColor(ca, ch)},
+    
+    //=== Getter ===
+    GetPosts: function(){return Posts},
+    GetInfo: function(){return Object.assign({},g)},
+    GetMasterServer: function(){return MasterServer},
+    GetOptions: function(){return Set},
+    
+    //=== Setter ===
+    //SetMasterServer: function(data){return MasterServer.data = data},
+    SetPostsNameByPost: function(nameByPost){return Posts.nameByPost = nameByPost}, //For adding things to the dataset
+    SetOptions: function(set){Set = set}, //Maybe an easy&fancy button that toggles the ReadOnly
+    
+    //=== Events ==
+    // FSInitFinished  triggers when the init is done
+    // NamesSynced  triggers when Posts.NameByPost has been updated but before the DOM change happens. Hint: this triggers three times short after
+    // FSPostUpdated triggers after the DOM change. Hint: this triggers three times short after
+  };
+  
 
   Main = {
     DOMinit: function() {
@@ -367,7 +394,9 @@
         }catch(e){console.log("Failed updating the server list", e);}
         Posts.init();
         Sync.init();
-        console.log("FS: init done");
+        API.init();
+	      
+        return $.event('FSInitFinished');
       }
     },
     boardLegit: function() {
@@ -727,6 +756,9 @@
           }
         }
       }
+      
+      return $.event('FSPostUpdated');
+      
     }
  /*
   * BROKEN: because there is no uID
@@ -985,7 +1017,7 @@
             }
             try {
               ref = JSON.parse(that.response);
-            }catch(e){console.log("error parsing json");return;}
+            }catch(e){console.log("error parsing json", that);return;}
             var trace = Set['Show origin'];
             var origin = (((that.responseURL)?that.responseURL:'')+((that.finalUrl)?that.finalUrl:'')).substr(8,3); // finalUrl or responseURL whatever
             Main.detectBgColor();
@@ -1014,7 +1046,7 @@
               Posts.nameByPost[ref[j].p] = stale;
             }
             Posts.updateAllPosts();
-            return $.event('NamesSynced');
+            return $.event('NamesSynced'); //Will trigger all event listeners on NamesSynced
           }
           );
 

@@ -341,19 +341,19 @@
     init: function(){d.frensync = this},
     
     //=== Helper ===
-    DetectBgColor: function(){Main.detectBgColor},
-    CalcColor: function(ca, ch){$.calcColor(ca, ch)},
+    detectBgColor: function(){Main.detectBgColor},
+    calcColor: function(ca, ch){$.calcColor(ca, ch)},
     
     //=== Getter ===
-    GetPosts: function(){return Posts},
-    GetInfo: function(){return Object.assign({},g)},
-    GetMasterServer: function(){return MasterServer},
-    GetOptions: function(){return Set},
+    getPosts: function(){return Posts},
+    getInfo: function(){return Object.assign({},g)},
+    getMasterServer: function(){return MasterServer},
+    getOptions: function(){return Set},
     
     //=== Setter ===
     //SetMasterServer: function(data){return MasterServer.data = data},
-    SetPostsNameByPost: function(nameByPost){return Posts.nameByPost = nameByPost}, //For adding things to the dataset
-    SetOptions: function(set){Set = set}, //Maybe an easy&fancy button that toggles the ReadOnly
+    setPostsNameByPost: function(nameByPost){return Posts.nameByPost = nameByPost}, //For adding things to the dataset
+    setOptions: function(set){Set = set}, //Maybe an easy&fancy button that toggles the ReadOnly
     
     //=== Events ==
     // FSInitFinished  triggers when the init is done

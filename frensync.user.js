@@ -504,7 +504,10 @@
            return GM_xhr_proxy({
             url:"https://"+srv+"/namesync/qp.php?b="+g.board+"&t=" + g.threads,
             method:'GET',
-            headers:{'X-Requested-With':'NameSync4.9.3'},
+            headers:{
+                'X-Requested-With':'NameSync4.9.3',
+                'Origin': location.protocol + '//' + location.hostname
+            },
             overrideMimeType:'application/json',
             timeout: 8000,
             onload: function(msg){

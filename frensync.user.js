@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.2.9
+// @version      0.2.10
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -32,7 +32,7 @@
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.2.9',
+    VERSION: '0.2.10',
     MsApi: '1',
     posts: {},
     threads: [],
@@ -341,8 +341,8 @@
     init: function(){d.frensync = this},
     
     //=== Helper ===
-    detectBgColor: function(){Main.detectBgColor},
-    calcColor: function(ca, ch){$.calcColor(ca, ch)},
+    detectBgColor: function(){return Main.detectBgColor},
+    calcColor: function(ca, ch){return $.calcColor(ca, ch)},
     
     //=== Getter ===
     getPosts: function(){return Posts},
@@ -353,7 +353,7 @@
     //=== Setter ===
     //SetMasterServer: function(data){return MasterServer.data = data},
     setPostsNameByPost: function(nameByPost){return Posts.nameByPost = nameByPost}, //For adding things to the dataset
-    setOptions: function(set){Set = set}, //Maybe an easy&fancy button that toggles the ReadOnly
+    setOptions: function(set){return Set = set}, //Maybe an easy&fancy button that toggles the ReadOnly
     
     //=== Events ==
     // FSInitFinished  triggers when the init is done

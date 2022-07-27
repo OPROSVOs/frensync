@@ -1,15 +1,16 @@
 # Step by step guide:
 
 ## Installing **without** any previous setup:
-* If you don't have an userscript extension like Greasemonkey or Tapermonkey. Get ViolentMonkey for [(Firefox)](https://addons.mozilla.org/de/firefox/addon/violentmonkey/) or [(Chrome)](https://chrome.google.com/webstore/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag) because ViolentMonkey is not properitary and doesn't use analytics / telemetry. But any userscript extension with the GM API should work.
-* Install [4chanX.user.js](https://www.4chan-x.net/builds/4chan-X.user.js) if you don't already have it
-* Install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) which includes Namesync functionality
+* If you don't have an userscript extension like ViolentMonkey  [(FF/Ya)](https://addons.mozilla.org/de/firefox/addon/violentmonkey/) / [(Cr)](https://chrome.google.com/webstore/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag) or TamperMonkey [(FF)](https://addons.mozilla.org/de/firefox/addon/tampermonkey/) / [(Cr)](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) or GreaseMonkey [(FF)](https://addons.mozilla.org/de/firefox/addon/greasemonkey/) , install one.
+ViolentMonkey is recommended for being open and very stable. TamperMonkey is more complex but also good. 
+* Install [4chanX.user.js](https://www.4chan-x.net/builds/4chan-X.user.js) if you don't already have it into the userscript extension 
+* Install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) which includes Namesync functionality into the userscript extension 
 
-## Installing **with** previous NS:
-* Backup your persona if you had one
-* No uBlock or Adblock rule update required if it has been previously set up
-* Disable every NS script **OR** extension that ran earlier and check that **only** 4chanX is active
-* Install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) which includes Namesync
+## Installing **with** previous Namesync:
+* Backup your persona 
+* No uBlock or Adblock rule update required
+* Disable every NS script **OR** extension that ran earlier and check that **only** one 4chanX is active 
+* Install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) into the userscript extension of your choice
 
 ## Recommended: AdBlock exception (Since the domains got flagged on some list)
 To get the original Namesync working with Adblockers like uBlock, add this one time to your **My Filter** ruleset:
@@ -29,6 +30,7 @@ To get the original Namesync working with Adblockers like uBlock, add this one t
 @@||erinsteph.com$xmlhttprequest,domain=4chan.org
 @@||erinsteph.com$xmlhttprequest,domain=4channel.org
 ```
+This includes the exceptions for 4chanX and TripFagFinder.
 ## Optional steps:
 * install [PersonaPlus](https://github.com/ErinSteph/PersonaPlus) to switch between multible names / tripcodes
 * install [OneeChan](https://github.com/KevinParnell/OneeChan/raw/master/builds/OneeChan.user.js) (works, tested by BCBoi)
@@ -49,9 +51,9 @@ If not, double check the adblock / ublock settings in this guide in the optional
 
 ## Currently no support for:
 
-The standalone browser extension (FF) (CR)
+The standalone browser extension (FF) (Cr)
 
-The iOS Webhub
+or iOS Webhub (user script extension).
 
 Use the [original NS](https://milkytiptoe.github.io/Name-Sync/) or [CuteSync](https://github.com/ErinSteph/Cute-Sync) for that.
 
@@ -60,11 +62,15 @@ Use the [original NS](https://milkytiptoe.github.io/Name-Sync/) or [CuteSync](ht
 ### There is an NS and FS in the corner OR there are multible NS running.
 You have multible instances running. Remove every Namesync or Frensync userscript AND check your extensions. Then verify its gone and install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) once
 
-### What is a tripcode?
-TLDR: A way around using an account with user/pass.
 
-Basically the output of an hash / one way math function so scammy people have a harder time inpersonating you. After your name add a # followed by some secret 10 characters. These will not be displayed but will generate a different text. It is difficult to get your secret 10 characters from that output and hinders people just writing your name into their fields to impersonate you. 
+
+### What is a tripcode?
+TLDR: A way around not using an account. Instead of a user&pass you only have a password/tripcode and the server displays the hash of it.
+
+Basically the output of an hash / one way math function so scammy people have a harder time inpersonating you. After your name add a # followed by some secret 10 characters. These will not be displayed but will generate a different text/hash. It is difficult to get your secret 10 characters from that output and hinders people just writing your name into their fields. 
 For better visibility / fun that generated output can partly have some letters of your choice in it. See [Meriken's Tripcode Engine](https://github.com/meriken/merikens-tripcode-engine-v3)
+
+
 
 ### The extension throws an error: localstorage get failed / localstorage access denied / ns-error-file-corrupted / NS_ERROR_FAILURE 
 When pressing F12 there is NS_ERROR_FAILURE all over in the console.
@@ -72,6 +78,8 @@ That means that the extension can't access its own settings to store the name an
 This is due to an **corrupted browser profile** which crashes some api calls from the extension.
 Either run checkdisk/chkdsk on the drive or delete the broken profile. You also might want to keep an eye on that drive as it might be broken soon.
 A quick fix is Settings -> Privacy -> Delete cookies and website data
+
+
 
 ### Sync works only to one server
 Check your adblock / ublock settings and filters.
@@ -81,9 +89,17 @@ Make sure you have the upper exceptions in your ruleset.
 Try checking the GM_API XHR checkbox, reload and see if it works. 
 Then leave it unchecked and reload for further debugging.
 
-### The console shows "... has been blocked permanently by the user" while using TamperMonkey
-The console can be accessed by pressing F12. This error results that certain servers are unreachable.
+### No sync to one or all servers, the console (F12) shows "... has been blocked permanently by the user"
+This is a Tampermonkey security feature and at some point you blocked a request by clicking "block".
+This error results that certain servers are unreachable.
 Check the XHR security tab in the script settings. There should be all just * and nothing blocked.
+
+
+
+### I'm getting an error popup from "Windows Script Host" throwing an "Microsoft JScript compilation error"
+Don't download the .js file. Get an userscript extension first and then click on the frensync.js to install it in the extension.
+
+
 
 ### Things don't work / Kittens are dying
 If the extension doesn't work as intended, first check this:

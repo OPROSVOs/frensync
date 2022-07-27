@@ -46,7 +46,8 @@ Head to 4chan and set 4chanX up and Namesync/Frensync with your persona (setting
 To set a name, open 4chan and open the FS settings in the top right: ![grafik](https://user-images.githubusercontent.com/19379091/162594758-062a7fc5-bc89-4849-adbb-44d9f2363c8a.png)
 
 Then check the Persona box, enter a name, optionally an email/subject/color and relaod the page:
-![grafik](https://user-images.githubusercontent.com/19379091/162594823-58822efc-89ee-41cf-b2b5-d2b4a0f4f925.png)
+![image](https://user-images.githubusercontent.com/19379091/181165176-27ecd0ab-e6f4-4dcf-ae43-737272ba0ea0.png)
+
 And if everything works, the name appears in the thread and the counter in the server status in the settings goes up.
 If everything works perfect, all three servers increment by one.
 If not, double check the adblock / ublock settings in this guide in the optional steps.

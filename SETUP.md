@@ -5,6 +5,7 @@
 ViolentMonkey is recommended for being open and very stable. TamperMonkey is more complex but also good. 
 * Install [4chanX.user.js](https://www.4chan-x.net/builds/4chan-X.user.js) if you don't already have it into the userscript extension 
 * Install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) which includes Namesync functionality into the userscript extension 
+* Continue with adding the AdBlock exception and set it up by checking the persona checkbox and enter your name.
 
 ## Installing **with** previous Namesync:
 * Backup your persona 

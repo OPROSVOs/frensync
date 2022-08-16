@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.2.10
+// @version      0.2.11
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -229,7 +229,7 @@
       //Regular XHRs run with the site traffic and any CORS problem or scriptblocker problem or Adblock problem will cause issues
       //Having them routed over the extension goes around all this but each extension has a different version of the GM_API.
       //The newer ones use a different naming and this might cause problems.
-      'GM_API XHR': [true, 'DEBUG: Route data over a side channel to prevent CORS, Adblock & Scriptblock issues'],
+      'GM_API XHR': [false, 'DEBUG: Route data over a side channel to prevent CORS, Adblock & Scriptblock issues'],
 
       //Shows markers from which server a post got sync data
       //To avoid more clutter this is just in fixed order and just a check or cross.
@@ -673,7 +673,8 @@
               alt: 'Synced Post',
               src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAABeUlEQVQY01WQSS8DYQCG3+/r6Ey1zOgUtUaIpYi0XCSERLhxEbEeJE4SPwCROEq4SpxcJJZGnDiQiAt6tDSkEluk0kNVR6fVZWr0cyF47u/zJg/BL5LsMI/J9ZwLAAv79MvwTXwdgGqkvIsAgEEi3Z0z5e6SFlH+M0TgTA3dHoT2bTXmfmIghtqe5YoLsVQQrraDW75NxQ1kUDcsjTlHS4ayrUY8eRQ/Vz0gzhY4LKaj+ceFgCc29y0jb3fpfi2qg3IU8VA6QouaLW0Rf1KLeOjKn1f24k2u7o0/TASvomlKqYlLqToI0ZDOSrTyHH+vJTUvADCdeURY/Ra7gM+PFKOZDxa3N+XwfWtVO+aazDQA8qPlO2JTYplgDF4mTjhzvlEySVlgn4DdIVHFq/QCIA2jeSONg4VDwetY/Hk3tUhck/lRNaAdVnZau4qduRJj//McL/lHdIUdkRxTbnssGT2VIMu0/n3Y5hCcBAby6kudh28SGwBUAPgCOfGTVEPk+YIAAAAASUVORK5CYII'
           });
-          $.add($('.catalog-icons', this.nodes.root), markerspan);
+          var icons = $('.catalog-icons', this.nodes.root);
+          if(icons){$.add(icons, markerspan)}
         }
       }
       if (namespan.textContent !== name) {

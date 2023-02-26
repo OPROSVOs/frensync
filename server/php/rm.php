@@ -10,15 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {exit("ok");}
 
 error_reporting (E_ALL ^ E_NOTICE);
 
+header("HTTP/1.1 501 Not Implemented");exit("Not implemented for now");
 
-header("HTTP/1.1 501 Not Implemented");
-exit("Not implemented for now until there is an added hash so trolls can't mass delete posts");
-
-/*
-
-// OLD
-
-// Flood Protection
 include 'FloodProtection.php';
 $myname = basename(__FILE__);
 $FloodProtection = new FloodProtection($myname, 10, 60); #the 9 valid requests within 60sec (preflieght+post) assume /trash/ and /b/ at the same time + 1 retry
@@ -47,12 +40,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $t = test_input($_POST["t"]);
     $b = test_input($_POST["b"]);
 }else{
-    header("HTTP/1.1 501 Not Implemented");
+    header("HTTP/1.1 405 Method Not Allowed");
     exit("nope");
 }
 
 // input range check
-if(!isset($p) or !is_numeric($p) or $p < 1 or $p > 4294967295 ){header("HTTP/1.1 406 Not Acceptable");exit("A");}
+if(!isset($p) or !is_numeric($p) or $p < 1 or $p > 4294967295 ){header("HTTP/1.1 406 Not Acceptable");exit("A");} 
 if(!isset($t) or !is_numeric($t) or $t < 1 or $t > 4294967295 ){header("HTTP/1.1 406 Not Acceptable");exit("B");}
 if(!isset($b) or strlen($b) > 5 ){header("HTTP/1.1 406 Not Acceptable");exit("C");}
 
@@ -69,6 +62,5 @@ $sql = "DELETE FROM s WHERE (p = {$p} AND t = {$t} AND b = {$b}) LIMIT 1; ";
 echo $db ->exec($sql);
 //if(!($b == "b" or $b == "trash" or $b == "s4s" or $b == "soc")){echo "nope";exit();}
 
-*/
 
 ?>

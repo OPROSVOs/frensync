@@ -62,12 +62,13 @@ Use the [original NS](https://milkytiptoe.github.io/Name-Sync/) or [CuteSync](ht
 
 ### Which fields are which
 Since 4chan /b/ is no longer in forced anon mode, the native fields (QuickReply box) work again with some limits.
-The name field in the QR is sent only to 4chan. Only tripcodes don't work here.
-The email field in the QR is sent only to 4chan and "sage" & "fortune" work here.
-The name field in the QR is sent only to 4chan and work when creating a new thread.
+There are two sets of fields: The native and 4chanX ones as well as the ones in the FS settings.
 
-The fields in the FS settings (or NS, CuteSync) are running on top of that, are **not** sent to 4chan and have no special function.
-The name field in FS have support for tripcodes, the email can be a fully written link, the subject always works and theres name color.
+The QR fields are only sent to 4chan. Names work but no tripcodes. The email field works and "sage" & "fortune" have a function here.
+And the subject is shown when creating a new thread.
+
+The fields in the FS settings (or NS, CuteSync) are running on top of that, are **not** sent to 4chan (and therefore have no special function like sage or fortune).
+The name field in FS had support for tripcodes, the email can be a fully written link, the subject always works and theres name color.
 
 ### What is a tripcode?
 TLDR: A way around not using an account. Instead of a user&pass you only have a password/tripcode and the server displays the hash of it.  

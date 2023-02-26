@@ -58,7 +58,7 @@ The standalone browser extension (FF) (Cr)
 or iOS Webhub (user script extension).  
 Use the [original NS](https://milkytiptoe.github.io/Name-Sync/) or [CuteSync](https://github.com/ErinSteph/Cute-Sync) for that.
 
-## FAQ / Debugging:
+## FAQ :
 
 ### Which fields are which
 Since 4chan /b/ is no longer in forced anon mode, the native fields (QuickReply box) work again with some limits.
@@ -69,25 +69,12 @@ The name field in the QR is sent only to 4chan and work when creating a new thre
 The fields in the FS settings (or NS, CuteSync) are running on top of that, are **not** sent to 4chan and have no special function.
 The name field in FS have support for tripcodes, the email can be a fully written link, the subject always works and theres name color.
 
-### There is an NS and FS in the corner OR there are multible NS running.
-You have multible instances running. Remove every Namesync or Frensync userscript AND check your extensions. Then verify its gone and install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) once
-
-
-
 ### What is a tripcode?
 TLDR: A way around not using an account. Instead of a user&pass you only have a password/tripcode and the server displays the hash of it.  
 Basically the output of an hash / one way math function so scammy people have a harder time inpersonating you. After your name add a # followed by some secret 10 characters. These will not be displayed but will generate a different text/hash. It is difficult to get your secret 10 characters from that output and hinders people just writing your name into their fields.  
 For better visibility / fun that generated output can partly have some letters of your choice in it. See [Meriken's Tripcode Engine](https://github.com/meriken/merikens-tripcode-engine-v3)
 
-
-
-### The extension throws an error: localstorage get failed / localstorage access denied / ns-error-file-corrupted / NS_ERROR_FAILURE 
-When pressing F12 there is NS_ERROR_FAILURE all over in the console.
-That means that the extension can't access its own settings to store the name and checkboxes.
-This is due to an **corrupted browser profile** which crashes some api calls from the extension.
-Either run checkdisk/chkdsk on the drive or delete the broken profile. You also might want to keep an eye on that drive as it might be broken soon.
-A quick fix is Settings -> Privacy -> Delete cookies and website data
-
+## Debugging problems:
 
 
 ### Sync works only to one server
@@ -95,6 +82,12 @@ Check your adblock / ublock settings and filters.
 Make sure you have the upper exceptions in your ruleset.  
 Try checking the GM_API XHR checkbox, reload and see if it works.  
 Then leave it unchecked and reload for further debugging.
+
+
+### There is an NS and FS in the corner OR there are multible NS running.
+You have multible instances running. Remove every Namesync or Frensync userscript AND check your extensions. Then verify its gone and install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) once
+
+
 
 ### No sync to one or all servers, the console (F12) shows "... has been blocked permanently by the user"
 This is a Tampermonkey security feature and at some point you blocked a request by clicking "block".  
@@ -106,6 +99,13 @@ Check the XHR security tab in the script settings. There should be all just * an
 ### I'm getting an error popup from "Windows Script Host" throwing an "Microsoft JScript compilation error"
 Don't download the .js file. Get an userscript extension first and then click on the frensync.js to install it in the extension.
 
+
+### The extension throws an error: localstorage get failed / localstorage access denied / ns-error-file-corrupted / NS_ERROR_FAILURE 
+When pressing F12 there is NS_ERROR_FAILURE all over in the console.
+That means that the extension can't access its own settings to store the name and checkboxes.
+This is due to an **corrupted browser profile** which crashes some api calls from the extension.
+Either run checkdisk/chkdsk on the drive or delete the broken profile. You also might want to keep an eye on that drive as it might be broken soon.
+A quick fix is Settings -> Privacy -> Delete cookies and website data
 
 
 ### Things don't work / Kittens are dying

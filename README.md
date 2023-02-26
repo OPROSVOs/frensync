@@ -32,7 +32,7 @@ Currently working client:
 * workarounds for misconfigured ad/script-blockers
 
 Tests:
-* Firefox 100 - OK
+* Firefox 102 - OK
 * Chrome 102 - OK
 * Yandex 22.3.4 - OK
 * Firefox mobile 66 - OK
@@ -48,7 +48,7 @@ Todos:
 * ~~Test with other servers ([NSredux](https://github.com/iBoonie/namesyncredux))~~ done
 * ~~Some settings don't apply without reloading after (read-only, persona), needs testing~~ done
 * qp.php rm.php: Delete data after some time
-* cleanup tha master server list thing as this is not changing anytime
+* cleanup the master server list as this is not changing anytime
 * validate timestamps with post timestamps
 * cleanup
 

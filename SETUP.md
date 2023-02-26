@@ -60,6 +60,15 @@ Use the [original NS](https://milkytiptoe.github.io/Name-Sync/) or [CuteSync](ht
 
 ## FAQ / Debugging:
 
+### Which fields are which
+Since 4chan /b/ is no longer in forced anon mode, the native fields (QuickReply box) work again with some limits.
+The name field in the QR is sent only to 4chan. Only tripcodes don't work here.
+The email field in the QR is sent only to 4chan and "sage" & "fortune" work here.
+The name field in the QR is sent only to 4chan and work when creating a new thread.
+
+The fields in the FS settings (or NS, CuteSync) are running on top of that, are **not** sent to 4chan and have no special function.
+The name field in FS have support for tripcodes, the email can be a fully written link, the subject always works and theres name color.
+
 ### There is an NS and FS in the corner OR there are multible NS running.
 You have multible instances running. Remove every Namesync or Frensync userscript AND check your extensions. Then verify its gone and install [frensync.user.js](https://github.com/OPROSVOs/frensync/raw/main/frensync.user.js) once
 

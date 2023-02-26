@@ -12,7 +12,7 @@ if($FloodProtection->check($_SERVER['REMOTE_ADDR'])){
 
 $db = new PDO('mysql:host=localhost;dbname=ns', 'ns', 'ns' );
 
-$sql = "SELECT distinct(s.t), b FROM sync ORDER BY t DESC LIMIT 5;";
+$sql = "SELECT distinct(sync.t), b FROM sync ORDER BY t DESC LIMIT 5;";
 
 $res =$db ->query( $sql);
 

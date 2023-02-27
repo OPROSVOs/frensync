@@ -238,7 +238,7 @@
 
       'LOG': [false, 'DEBUG: Fill the console with lots of stuff for debugging (slow); leave it off'],
 
-      'CustomScript': [false, 'Enables extra features: Execute a scriptlet before posting to customize fields, uses eval'],
+      'CustomScript': [false, 'Enables extra features: Execute a scriptlet before posting to customize fields, uses eval (relaod after change)'],
 
     },
     other: {

@@ -32,7 +32,7 @@
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.2.10',
+    VERSION: '0.2.11',
     MsApi: '1',
     posts: {},
     threads: [],
@@ -236,7 +236,9 @@
       //A cross means that the server has no data either because the user didn't sync to there or the server has an fault or this client fails to get the server data
       'Show origin': [false, 'DEBUG: Show the sync source. Order: Frensync, NamesyncRedux, Namesync original'],
 
-      //'LOG': [false, 'DEBUG: Fill the console with lots of stuff for debugging (slow); leave it off'],
+      'LOG': [false, 'DEBUG: Fill the console with lots of stuff for debugging (slow); leave it off'],
+
+      'CustomScript': [false, 'Enables extra features: Execute a scriptlet before posting to customize fields, uses eval'],
 
     },
     other: {
@@ -334,22 +336,22 @@
       }
     }
   };
-  
+
   //A small interface for helper scripts
   API = {
     API_VERSION: 1,
     init: function(){d.frensync = this},
-    
+
     //=== Helper ===
     detectBgColor: function(){return Main.detectBgColor},
     calcColor: function(ca, ch){return $.calcColor(ca, ch)},
-    
+
     //=== Getter ===
     getPosts: function(){return Posts},
     getInfo: function(){return Object.assign({},g)},
     getMasterServer: function(){return MasterServer},
     getOptions: function(){return Set},
-    
+
     //=== Setter ===
     //SetMasterServer: function(data){return MasterServer.data = data},
     setPostsNameByPost: function(nameByPost){return Posts.nameByPost = nameByPost}, //For adding things to the dataset
@@ -395,7 +397,7 @@
         Posts.init();
         Sync.init();
         API.init();
-	      
+
         return $.event('FSInitFinished');
       }
     },
@@ -822,12 +824,40 @@
   	</legend>
   <p>Share these fields instead of the 4chan X quick reply fields.</p>
   <div>
-    	<input type=text name=Name placeholder=Name>
-    	<input type=text name=Email placeholder=Email>
-    	<input type=text name=Subject placeholder=Subject>
-      <input type=text name=ColorPreview value='Color:' placeholder='color:' readonly=readonly style='width:35px;border:0'>
-		  <input type=number name=ColorAmount placeholder=0 value=0 min=0 max=50 step=1 style='width:50px'  title='How much color shall it be (0-50)? Depends on dark/bright theme'>
-		  <input type=number name=ColorHue placeholder=0 value=0 min=0 max=359 step=5 style='width:50px' title='Hue (0-359)'>
+    	<p style="margin:0.1em 0px">
+        <span style=display:inline-block>Name (plain text):</span>
+        <input type=text name=Name placeholder=Name>
+        <span style=display:inline-block>preview:</span>
+        <span style=display:inline-block><input type=text name=ColorPreview value='Color preview' placeholder='Color preview' readonly=readonly style='width:35px;border:0'></span>
+      </p>
+      <p style="margin:0.1em 0px">
+        <span style=display:inline-block>Name (formatted):</span>
+        <input type=text name=NameF placeholder=Name>
+        <span style=display:inline-block>preview:</span>
+        <span style=display:inline-block>blah</span>
+      </p>
+      <p style="margin:0.1em 0px">
+        <span style=display:inline-block>Email:</span>
+        <input type=text name=Email placeholder=Email>
+      </p>
+      <p style="margin:0.1em 0px">
+        <span style=display:inline-block>Subject:</span>
+        <input type=text name=Subject placeholder=Subject>
+      </p>
+    	<p style="margin:0.1em 0px">
+        <span style=display:inline-block>Color:</span>
+        <span style=display:inline-block>Color lightness:</span>
+		    <input type=number name=ColorAmount placeholder=0 value=0 min=0 max=50 step=1 style='width:50px'  title='How much color shall it be (0-50)? Depends on dark/bright theme'>
+		    <span style=display:inline-block>Color hue:</span>
+        <input type=number name=ColorHue placeholder=0 value=0 min=0 max=359 step=5 style='width:50px' title='Hue (0-359)'>
+      </p>
+      <p style="margin:0.1em 0px" id="FScustomscriptnode">
+        <span style=display:inline-block>Custom script : function(params[ca,ch,n,e,s]])(</span>
+        <input type=text name=FsScript placeholder="example:  params[0]=42;return params;" style='width:480px;border:0' title='A scriptlet that gets executed before sending; gets an array as param, expects that array as return'>
+        <span style=display:inline-block>);</span>
+      </p>
+
+
   </div>
 </fieldset>
 <fieldset>
@@ -925,6 +955,8 @@
       $.on(ca, 'change', c);
       $.on(ch, 'change', c);
       c('');
+
+      if($.get('CustomScript') !== 'true'){$('#FScustomscriptnode', section).style.visibility = 'hidden'}
       /*
        * watchSettings = function(e) {
         if ((input = $.getOwn(inputs, e.target.name))) {
@@ -995,6 +1027,7 @@
       if (g.threads.length === 0) {
         return;
       }
+      if(Set['LOG']){console.log("SYNC", repeat);}
       var len, i;
       for (i = 0, len = MasterServer.data.server.length; i < len; i++) {
         var srv = MasterServer.getServer(i);
@@ -1100,7 +1133,7 @@
       return $('input[data-name=email]', qr).placeholder = 'E-mail';
     },
     requestSend: function(e) {
-      var currentEmail, currentName, currentSubject, postID, qr, threadID;
+      var currentEmail, currentName, currentSubject, postID, qr, threadID, ca, ch, func;
       postID = e.detail.postID;
       threadID = e.detail.threadID;
       if (Set['Persona Fields']) {
@@ -1125,16 +1158,57 @@
       if (currentName + currentEmail + currentSubject === '') {
         return;
       }
-      return Sync.send(currentName, currentEmail, currentSubject, postID, threadID);
+
+      ca = $.get("ColorAmount");
+      ch = $.get("ColorHue");
+
+      //Custom script part if checked
+      if($.get('CustomScript') === "true"){
+        var func = $.get("FsScript");
+        try{
+          if(func != null && func.length > 0){
+            var params = [ca, ch, currentName, currentEmail, currentSubject];
+            console.log("FS: Custom script parameters:", params);
+
+            //eval under the hood in global scope("how you call it in the string", executable string)(data passed)
+            var ret = new Function("params", func)(params);
+            //Example for func: Change ca to 42 and count ch up 0, 5, 10, 15
+            //params[0]=42;params[1]=(document.i=5+document.i||0);return params;
+
+            console.log("FS: Custom script returns:", ret);
+            if(Array.isArray(ret)){ //double check before applying changes
+              if(ret[0]!=null){ca=ret[0]}
+              if(ret[1]!=null){ch=ret[1]}
+              if(ret[2]!=null){currentName=ret[2]}
+              if(ret[3]!=null){currentEmail=ret[3]}
+              if(ret[4]!=null){currentSubject=ret[4]}
+            }else{console.log("FS:Expected an Array as return");}
+          }else{
+            console.log("FS:No valid scriptlet in config");
+          }
+        }catch(e){
+          console.log("FS custom script error:", e);
+          $.event('CreateNotification', {
+                detail: {
+                  type: 'warning',
+                  content: 'FS: There was an error executing the custom script in the settings. Check logs.',
+                  lifetime: 8
+           }
+          });
+        }
+      }
+      
+      return Sync.send(currentName, currentEmail, currentSubject, postID, threadID, null, ca, ch);
     },
-    send: function(name, email, subject, postID, threadID, retryTimer) {
+    send: function    (name,email,subject,postID, threadID, retryTimer, ca, ch) {
+    if(Set['LOG']){try{console.log("SEND POST", name.slice(0,name.indexOf("#")).padEnd(16,"*"), email, subject, postID, threadID, retryTimer, ca, ch, );}catch(e){}}
     var len, i;
     for (i = 0, len = MasterServer.data.server.length; i < len; i++) {
       var srv = MasterServer.getServer(i);
       var val = MasterServer.getServerInfo(i);
       if (val.sp === false) { continue; }
       try{
-          var col = "&ca=" + parseInt($.get("ColorAmount"))+ "&ch=" + parseInt($.get("ColorHue"));
+          var col = "&ca=" + parseInt(ca)+ "&ch=" + parseInt(ch);
           var ident = "&n=" + (encodeURIComponent(name)) + "&s=" + (encodeURIComponent(subject)) + "&e=" + (encodeURIComponent(email));
           if(srv == "namesync.net"){col = "";} //the server returns still an error 500... maybe the requested_with
           var params = "p=" + postID + "&t=" + threadID + "&b=" + g.board + ident + "&dnt=" + (Set['Do Not Track'] ? '1' : '0') + col;

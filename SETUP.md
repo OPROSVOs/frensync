@@ -75,6 +75,22 @@ TLDR: A way around not using an account. Instead of a user&pass you only have a 
 Basically the output of an hash / one way math function so scammy people have a harder time inpersonating you. After your name add a # followed by some secret 10 characters. These will not be displayed but will generate a different text/hash. It is difficult to get your secret 10 characters from that output and hinders people just writing your name into their fields.  
 For better visibility / fun that generated output can partly have some letters of your choice in it. See [Meriken's Tripcode Engine](https://github.com/meriken/merikens-tripcode-engine-v3)
 
+### Special options documentation
+#### GM_XHR
+There is a way to bypass some browser extensions if you have issues with them.
+With it checked the sync will go through the extension itself and not over the webpage which is more reliable but harder to debug.
+Leave it off when not needed, turn on for a while when nothing comes through and it might be some adblocker.
+#### LOG
+With it on, there will be some messages on the javascript console.
+#### Custom Script
+With it on, you'll see another name option after reloading.
+The custom script field will be evaluated when posting.
+It has the parameters color_amount, color_hue, name, email and subject in the array called **params**
+It requires you to return it back after modifying the contents.
+That way arbitary names (like post number) and color shifts are possible.
+Example: `return params;` does nothing or `params[1]=40+2;return params;` changes the hue to 42 of 360.
+Errors are posted to the log and theres a toast.
+
 ## Debugging problems:
 
 

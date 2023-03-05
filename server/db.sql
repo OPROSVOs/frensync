@@ -13,6 +13,7 @@ CREATE TABLE `names` (
   `dnt` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `ch` smallint DEFAULT NULL,
   `ca` smallint DEFAULT NULL,
+  `f` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `h` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`) USING BTREE, /* used for joins */

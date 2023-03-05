@@ -217,6 +217,7 @@
      // 'Do Not Track TFF': [false, 'Request to not show fields in a manner that shows what thread is active.'], // Not implemented
 
       'Colors': [true, 'Show name colors when available.'],
+      'MoreColors': [true, 'Show custom css name colors when available.'],
 
       // unchecked: just show a regular mailto: link while
       // checked: try to guess a if its a link or text and do the best.
@@ -238,7 +239,7 @@
 
       'LOG': [false, 'DEBUG: Fill the console with lots of stuff for debugging (slow); leave it off'],
 
-      'CustomScript': [false, 'Enables extra features: Execute a scriptlet before posting to customize fields, uses eval (relaod after change)'],
+      'CustomScript': [false, 'Enables extra features: Execute a scriptlet before posting to customize fields, uses eval (reload after change)'],
 
     },
     other: {
@@ -356,13 +357,13 @@
     //SetMasterServer: function(data){return MasterServer.data = data},
     setPostsNameByPost: function(nameByPost){return Posts.nameByPost = nameByPost}, //For adding things to the dataset
     setOptions: function(set){return Set = set}, //Maybe an easy&fancy button that toggles the ReadOnly
-    
+
     //=== Events ==
     // FSInitFinished  triggers when the init is done
     // NamesSynced  triggers when Posts.NameByPost has been updated but before the DOM change happens. Hint: this triggers three times short after
     // FSPostUpdated triggers after the DOM change. Hint: this triggers three times short after
   };
-  
+
 
   Main = {
     DOMinit: function() {
@@ -571,6 +572,7 @@
       }
     };
 
+
     Posts = {
     nameByPost: {},
     nameByID: {},
@@ -643,6 +645,10 @@
         subject = oinfo.s;
         ca = parseInt(oinfo.ca) || 0;
         ch = parseInt(oinfo.ch) || 0;
+
+
+      if(Set['LOG']){console.log("updatePost", oinfo);}
+
       }
       if (Set['Custom Names'] && uID !== 'Heaven' && $('.sync-custom', this.nodes.info) === null) {
         el = $.el('a', {
@@ -728,6 +734,56 @@
           if (tripspan){tripspan.style.color=str;}
           if (namespan){namespan.style.color=str;}
       }
+      if(oinfo.f && Set['MoreColors'] != false){
+          try{
+            var nameRoot, infoRoot, fstr, str, cmd, index, light, dark;
+            light = Main.brightness > 128;
+            dark = !light;
+            nameRoot = $('.nameBlock', this.nodes.info);
+            infoRoot = this.nodes.info;
+            var checkgradient = function(cmd, type, where){
+              // "A90,#f00,#0f0 40%,#00f 20px" => "linear-gradient(90deg, #ff0000, #00ff00 40%, #0000ff 20px)"
+              //Sanitize again, url() is forbidden so rgb() and hsla() is also to make filtering simple, #RRGGBBAA works
+              var strarr = cmd.substring(1).replace(/([^a-f0-9pxm\%\,\ \#]+)/gi, '').split(",");
+                where.style.background=type+'('+strarr.shift()+'deg, '+ strarr.join()+')';
+                where.style['-webkit-background-clip'] = 'text';
+                where.style['-webkit-text-fill-color'] = 'transparent';
+            }
+            var checkshadow = function(cmd){
+                var strarr = cmd.substring(1).replace(/([^a-f0-9\,\ \#]+)/gi, '').split(",");
+                if(!strarr[0] || strarr[0] < 0 || strarr[0] > 15){strarr[0]=0;} // X
+                if(!strarr[1] || strarr[1] < 0 || strarr[1] > 15){strarr[1]=0;} // Y
+                if(!strarr[2] || strarr[2] < 1 || strarr[2] > 25){strarr[2]=5;} // Blur
+                if(!/^\#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(strarr[3])){strarr[3]='#000';} // Color
+                return strarr[0]+'px '+strarr[1]+'px '+strarr[2]+'px '+strarr[3];
+            }
+            fstr = oinfo.f.split('|');//Format strings are chained with |
+            fstr.forEach (function (str, index) {
+              //Each cmd has to start with a type and has its own sanitize
+
+              //UpperCase => Executed in light theme, LowerCase => Executed in dark theme
+              cmd = str.charAt(0);
+              if((Main.brightness > 128 && cmd == cmd.toLowerCase()) || (Main.brightness <= 128 && cmd == cmd.toUpperCase())){ return }
+              cmd = cmd.toUpperCase();
+              // Color gradients: Not visually compatible with strong text shadow, avoid black, white, grays
+              if(cmd === "A"){checkgradient(str, 'linear-gradient', namespan);}
+              if(cmd === "B"){checkgradient(str, 'repeating-linear-gradient', namespan);}
+              if(cmd === "C" && tripspan){checkgradient(str, 'linear-gradient', tripspan);}
+              if(cmd === "D" && tripspan){checkgradient(str, 'repeating-linear-gradient', tripspan);}
+              if(cmd === "E"){checkgradient(str, 'linear-gradient', nameRoot);}
+              if(cmd === "F"){checkgradient(str, 'repeating-linear-gradient', nameRoot);}
+              if(cmd === "G"){checkgradient(str, 'linear-gradient', subjectspan);}
+              if(cmd === "H"){checkgradient(str, 'repeating-linear-gradient', subjectspan);}
+              if(cmd === "I"){checkgradient(str, 'linear-gradient', infoRoot);}
+              if(cmd === "J"){checkgradient(str, 'repeating-linear-gradient', infoRoot);}
+              if(cmd === "K" && namespan){namespan.style['text-shadow'] = checkshadow(str);}
+              if(cmd === "L" && tripspan){tripspan.style['text-shadow'] = checkshadow(str);}
+              if(cmd === "M" && subjectspan){subjectspan.style['text-shadow'] = checkshadow(str);}
+              if(cmd === "N" && infoRoot){infoRoot.style['text-shadow'] = checkshadow(str);}
+
+            });
+          }catch(e){console.log('FS: Extra colors failed for ', oinfo.p, e);}
+      }
       if(oinfo.sus){
         var suspan = $.el('img', {
               alt:  'Sus',
@@ -759,9 +815,9 @@
           }
         }
       }
-      
+
       return $.event('FSPostUpdated');
-      
+
     }
  /*
   * BROKEN: because there is no uID
@@ -825,16 +881,8 @@
   <p>Share these fields instead of the 4chan X quick reply fields.</p>
   <div>
     	<p style="margin:0.1em 0px">
-        <span style=display:inline-block>Name (plain text):</span>
+        <span style=display:inline-block>Name:</span>
         <input type=text name=Name placeholder=Name>
-        <span style=display:inline-block>preview:</span>
-        <span style=display:inline-block><input type=text name=ColorPreview value='Color preview' placeholder='Color preview' readonly=readonly style='width:35px;border:0'></span>
-      </p>
-      <p style="margin:0.1em 0px">
-        <span style=display:inline-block>Name (formatted):</span>
-        <input type=text name=NameF placeholder=Name>
-        <span style=display:inline-block>preview:</span>
-        <span style=display:inline-block>blah</span>
       </p>
       <p style="margin:0.1em 0px">
         <span style=display:inline-block>Email:</span>
@@ -850,6 +898,11 @@
 		    <input type=number name=ColorAmount placeholder=0 value=0 min=0 max=50 step=1 style='width:50px'  title='How much color shall it be (0-50)? Depends on dark/bright theme'>
 		    <span style=display:inline-block>Color hue:</span>
         <input type=number name=ColorHue placeholder=0 value=0 min=0 max=359 step=5 style='width:50px' title='Hue (0-359)'>
+      </p>
+      <p style="margin:0.1em 0px" id="FSmorecolorsnode">
+        <span style=display:inline-block name=FStringTest>'More colors' string:</span>
+        <input type=text name=FString placeholder='See documentation' maxlength=256 style='width:400px'>
+        <span style=display:inline-block><a href='https://github.com/OPROSVOs/frensync/blob/main/README_colors.md' target=_new>[?]</a></span>
       </p>
       <p style="margin:0.1em 0px" id="FScustomscriptnode">
         <span style=display:inline-block>Custom script : function(params[ca,ch,n,e,s]])(</span>
@@ -945,18 +998,41 @@
       }
       MasterServer.checkAvail($('#availRoot', section));
       $.on($('#syncClear', section), 'click', Sync.clear);//TODO
-      var pr=$('input[Name=ColorPreview]', section);
+      var pr=$('[Name=ColorPreview]', section);
       var ca=$('input[Name=ColorAmount]', section);
+      var fs=$('input[Name=FString]', section);
+      var fst=$('[Name=FStringTest]', section);
       var ch=$('input[Name=ColorHue]', section);
+      var na=$('input[Name=Name]', section);
+
       var c= function(e) {
-        pr.style.backgroundColor=((1<=ca.value)?($.calcColor(ch.value,ca.value)):"");
+        na.style.color=((1<=ca.value)?($.calcColor(ch.value,ca.value)):"");
         if(e=='change'){$.set('ca', ca.value);$.set('ch', ch.value);}
       }
       $.on(ca, 'change', c);
       $.on(ch, 'change', c);
       c('');
 
+      var d = function(e) {
+        try{
+          fs.value.split('|').forEach((e,i) => {
+            var cmd = e.charAt(0).toLowerCase();
+            if(cmd == 'a' || cmd == 'c' || cmd == 'e' || cmd == 'g' || cmd == 'i'){
+                var strarr = e.substring(1).replace(/([^a-f0-9pxm\%\,\ \#]+)/gi, '').split(",");
+                fst.style.background='linear-gradient('+strarr.shift()+'deg, '+ strarr.join()+')';
+                fst.style['-webkit-background-clip'] = 'text';
+                fst.style['-webkit-text-fill-color'] = 'transparent';
+            }
+          });
+
+        }catch(e){console.log("FS: Settings",e)}
+
+      }
+      $.on(fs, 'change', d);
+      d('');
+
       if($.get('CustomScript') !== 'true'){$('#FScustomscriptnode', section).style.visibility = 'hidden'}
+      if($.get('MoreColors') == 'false'){$('#FSmorecolorsnode', section).style.visibility = 'hidden'}
       /*
        * watchSettings = function(e) {
         if ((input = $.getOwn(inputs, e.target.name))) {
@@ -1089,36 +1165,6 @@
         }
       }
 
-    /*
-	  this.NSserver = (parseInt($.get('NSserver'))) || 'namesync.net,m8q16hakamiuv8ch.myfritz.net';
-	  this.NSserver.split(',').forEach(function(server){
-		  $.ajax(server, 'qp', 'GET', "t=" + g.threads + "&b=" + g.board, {
-			onloadend: function() {
-			  var i, len, poster, ref;
-			  if (!(this.status === 200 && this.response)) {
-				return;
-			  }
-			  if (g.view === 'thread') {
-				Sync.lastModified = this.getResponseHeader('Last-Modified') || Sync.lastModified;
-			  }
-			  var ref;
-			  try {
-				ref = JSON.parse(this.response);
-			  }catch(e){
-				  // console.log(e); //error expected
-				  return;
-			  }
-        Main.detectBgColor();
-			  for (i = 0, len = ref.length; i < len; i++) {
-          poster = ref[i];
-          Posts.nameByPost[poster.p] = poster;
-			  }
-			  Posts.updateAllPosts();
-			  return $.event('NamesSynced');
-			}
-		  });
-	  });*/
-
       if (repeat && g.view === 'thread' && !Sync.disabled) {
         return setTimeout(Sync.sync, 30000, true);
       }
@@ -1133,7 +1179,7 @@
       return $('input[data-name=email]', qr).placeholder = 'E-mail';
     },
     requestSend: function(e) {
-      var currentEmail, currentName, currentSubject, postID, qr, threadID, ca, ch, func;
+      var currentEmail, currentName, currentSubject, postID, qr, threadID, ca, ch, func, fstring;
       postID = e.detail.postID;
       threadID = e.detail.threadID;
       if (Set['Persona Fields']) {
@@ -1161,13 +1207,14 @@
 
       ca = $.get("ColorAmount");
       ch = $.get("ColorHue");
+      fstring = $.get("FString");
 
       //Custom script part if checked
       if($.get('CustomScript') === "true"){
         var func = $.get("FsScript");
         try{
           if(func != null && func.length > 0){
-            var params = [ca, ch, currentName, currentEmail, currentSubject];
+            var params = [ca, ch, currentName, currentEmail, currentSubject, fstring];
             console.log("FS: Custom script parameters:", params);
 
             //eval under the hood in global scope("how you call it in the string", executable string)(data passed)
@@ -1182,6 +1229,7 @@
               if(ret[2]!=null){currentName=ret[2]}
               if(ret[3]!=null){currentEmail=ret[3]}
               if(ret[4]!=null){currentSubject=ret[4]}
+              if(ret[5]!=null){fstring=ret[5]}
             }else{console.log("FS:Expected an Array as return");}
           }else{
             console.log("FS:No valid scriptlet in config");
@@ -1197,18 +1245,18 @@
           });
         }
       }
-      
-      return Sync.send(currentName, currentEmail, currentSubject, postID, threadID, null, ca, ch);
+
+      return Sync.send(currentName, currentEmail, currentSubject, postID, threadID, null, ca, ch, fstring);
     },
-    send: function    (name,email,subject,postID, threadID, retryTimer, ca, ch) {
-    if(Set['LOG']){try{console.log("SEND POST", name.slice(0,name.indexOf("#")).padEnd(16,"*"), email, subject, postID, threadID, retryTimer, ca, ch, );}catch(e){}}
+    send: function    (name,email,subject,postID, threadID, retryTimer, ca, ch, fstring) {
+    if(Set['LOG']){try{console.log("SEND POST", name.slice(0,name.indexOf("#")).padEnd(16,"*"), email, subject, postID, threadID, retryTimer, ca, ch, fstring);}catch(e){}}
     var len, i;
     for (i = 0, len = MasterServer.data.server.length; i < len; i++) {
       var srv = MasterServer.getServer(i);
       var val = MasterServer.getServerInfo(i);
       if (val.sp === false) { continue; }
       try{
-          var col = "&ca=" + parseInt(ca)+ "&ch=" + parseInt(ch);
+          var col = "&ca=" + parseInt(ca)+ "&ch=" + parseInt(ch) + "&fstr=" + (encodeURIComponent(fstring));
           var ident = "&n=" + (encodeURIComponent(name)) + "&s=" + (encodeURIComponent(subject)) + "&e=" + (encodeURIComponent(email));
           if(srv == "namesync.net"){col = "";} //the server returns still an error 500... maybe the requested_with
           var params = "p=" + postID + "&t=" + threadID + "&b=" + g.board + ident + "&dnt=" + (Set['Do Not Track'] ? '1' : '0') + col;

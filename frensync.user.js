@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.2.11
+// @version      0.2.12
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -23,7 +23,7 @@
 // ==/UserScript==
 
 (function() {
-  var $, $$, CSS, Config, Filter, NameFetch, Main, Post, Posts, Set, API, MasterServer, Settings, Sync, d, g, GM_xhr_proxy,
+  var $, $$, CSS, Config, Filter, NameFetch, Main, Post, Posts, Fstr, Set, API, MasterServer, Settings, Sync, d, g, GM_xhr_proxy,
     indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   Set = {};
@@ -32,7 +32,7 @@
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.2.11',
+    VERSION: '0.2.12',
     MsApi: '1',
     posts: {},
     threads: [],
@@ -239,7 +239,7 @@
 
       'LOG': [false, 'DEBUG: Fill the console with lots of stuff for debugging (slow); leave it off'],
 
-      'CustomScript': [false, 'Enables extra features: Execute a scriptlet before posting to customize fields, uses eval (reload after change)'],
+      //'CustomScript': [false, 'Enables extra features: Execute a scriptlet before posting to customize fields, uses eval (reload after change)'],
 
     },
     other: {
@@ -573,6 +573,8 @@
     };
 
 
+
+
     Posts = {
     nameByPost: {},
     nameByID: {},
@@ -662,7 +664,9 @@
           return Posts.customName(uID);
         });
       }
-      if (!linfo && !oinfo) {
+
+
+      if ((!linfo && !oinfo) || (oinfo && oinfo.ups > ( 6 + Posts.nameByPost.length))) {//forces an update with every new post but doesn't update to death on an stalled thread
         return;
       }
 
@@ -670,6 +674,7 @@
       subjectspan = this.nodes.subject;
       tripspan = $('.postertrip', this.nodes.info);
       emailspan = $('.useremail', this.nodes.info);
+
       if(Set['Show origin'] && oinfo != null) {
           subject ="[" + ((oinfo.m8q)?"✔️":"❌")+((oinfo.nsr)?"✔️":"❌")+((oinfo.nam)?"✔️":"❌") + "]"+ (subject||"") ;
       }
@@ -816,6 +821,15 @@
         }
       }
 
+      //Remember that we updated the DOM
+      if(!oinfo.ups && Posts.nameByPost[oinfo.p]){
+          Posts.nameByPost[oinfo.p].ups = 1 ;
+      }
+      if(Posts.nameByPost[oinfo.p].ups != null){
+        Posts.nameByPost[oinfo.p].ups++;
+      }
+
+
       return $.event('FSPostUpdated');
 
     }
@@ -925,11 +939,7 @@
           </span>
 
       </p>
-      <p style="margin:0.1em 0px" id="FScustomscriptnode">
-        <span style=display:inline-block>Custom script : function(params[ca,ch,n,e,s]])(</span>
-        <input type=text name=FsScript placeholder="example:  params[0]=42;return params;" style='width:480px;border:0' title='A scriptlet that gets executed before sending; gets an array as param, expects that array as return'>
-        <span style=display:inline-block>);</span>
-      </p>
+      <br>
 
 
   </div>
@@ -1038,7 +1048,7 @@
         try{
           var elements = [$('#fsdmn', section), $('#fslmn', section), $('#fsdmt', section), $('#fslmt', section), $('#fsdms', section), $('#fslms', section), $('#fsdmi', section), $('#fslmi', section), $('#fsdmm', section), $('#fslmm', section)];
           elements.forEach((e,i)=>{e.style['text-shadow']="";e.style.background="";e.style['-webkit-text-fill-color'] =""});
-          
+
           fs.value.split('|').forEach((e,i) => {
             var cmd = e.charAt(0);
             var cg = function(cmd, type, where){
@@ -1093,7 +1103,7 @@
       $.on(fs, 'change', d);
       d('');
 
-      if($.get('CustomScript') !== 'true'){$('#FScustomscriptnode', section).style.visibility = 'hidden'}
+
       if($.get('MoreColors') == 'false'){$('#FSmorecolorsnode', section).style.visibility = 'hidden'}
       /*
        * watchSettings = function(e) {
@@ -1272,6 +1282,7 @@
       fstring = $.get("FString");
 
       //Custom script part if checked
+      /*
       if($.get('CustomScript') === "true"){
         var func = $.get("FsScript");
         try{
@@ -1306,7 +1317,7 @@
            }
           });
         }
-      }
+      }*/
 
       return Sync.send(currentName, currentEmail, currentSubject, postID, threadID, null, ca, ch, fstring);
     },

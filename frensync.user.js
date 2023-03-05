@@ -217,7 +217,7 @@
      // 'Do Not Track TFF': [false, 'Request to not show fields in a manner that shows what thread is active.'], // Not implemented
 
       'Colors': [true, 'Show name colors when available.'],
-      'MoreColors': [true, 'Show custom css name colors when available.'],
+      'MoreColors': [true, 'Show custom css name colors when available. (reload after change)'],
 
       // unchecked: just show a regular mailto: link while
       // checked: try to guess a if its a link or text and do the best.
@@ -893,7 +893,7 @@
         <input type=text name=Subject placeholder=Subject>
       </p>
     	<p style="margin:0.1em 0px">
-        <span style=display:inline-block>Color:</span>
+        <span style=display:inline-block>'Simple Color':</span>
         <span style=display:inline-block>Color lightness:</span>
 		    <input type=number name=ColorAmount placeholder=0 value=0 min=0 max=50 step=1 style='width:50px'  title='How much color shall it be (0-50)? Depends on dark/bright theme'>
 		    <span style=display:inline-block>Color hue:</span>
@@ -901,8 +901,29 @@
       </p>
       <p style="margin:0.1em 0px" id="FSmorecolorsnode">
         <span style=display:inline-block name=FStringTest>'More colors' string:</span>
-        <input type=text name=FString placeholder='See documentation' maxlength=256 style='width:400px'>
-        <span style=display:inline-block><a href='https://github.com/OPROSVOs/frensync/blob/main/README_colors.md' target=_new>[?]</a></span>
+        <input type=text name=FString placeholder='See documentation, leave empty when unused' maxlength=256 style='width:400px'>
+        <span style=display:inline-block><a href='https://github.com/OPROSVOs/frensync/blob/main/README_colors.md' target=_new>[HELP]</a></span>
+        <br><br>
+        <span style='margin:9px;padding:9px;border:1px solid gray;background-color: #282a2e;color:#c5c8c6'>
+          <span id=fsdmi style=font-size:10pt>
+            <span id=fsdms style=color:#b294bb;font-weight:700>Preview Darkmodesubject</span>
+            <span id=fsdmm style=font-size:10pt>
+              <span id=fsdmn style=color:#c5c8c6;font-weight:700>Darkmodename</span>
+              <span id=fsdmt style=color:#c5c8c6;font-weight:400>!tripcode12</span>
+            </span>
+             01/01/22(Sa)12:34:56 No.000000001</span>
+          </span>
+        <br><br>
+        <span style='margin:9px;padding:9px;border:1px solid gray;background-color: #f0e0d6;color:maroon'>
+          <span id=fslmi style=font-size:10pt>
+          <span id=fslms style=color:#cc1105;font-weight:700>Preview Lightmodesubject</span>
+            <span id=fslmm style=font-size:10pt>
+              <span id=fslmn style=color:#117743;font-weight:700>Lightmodename</span>
+              <span id=fslmt style=color:#117743;font-weight:400>!tripcode12</span>
+            </span>
+             01/01/22(Sa)12:34:56 No.000000001</span>
+          </span>
+
       </p>
       <p style="margin:0.1em 0px" id="FScustomscriptnode">
         <span style=display:inline-block>Custom script : function(params[ca,ch,n,e,s]])(</span>
@@ -1015,14 +1036,55 @@
 
       var d = function(e) {
         try{
+          var elements = [$('#fsdmn', section), $('#fslmn', section), $('#fsdmt', section), $('#fslmt', section), $('#fsdms', section), $('#fslms', section), $('#fsdmi', section), $('#fslmi', section), $('#fsdmm', section), $('#fslmm', section)];
+          elements.forEach((e,i)=>{e.style['text-shadow']="";e.style.background="";e.style['-webkit-text-fill-color'] =""});
+          
           fs.value.split('|').forEach((e,i) => {
-            var cmd = e.charAt(0).toLowerCase();
-            if(cmd == 'a' || cmd == 'c' || cmd == 'e' || cmd == 'g' || cmd == 'i'){
-                var strarr = e.substring(1).replace(/([^a-f0-9pxm\%\,\ \#]+)/gi, '').split(",");
-                fst.style.background='linear-gradient('+strarr.shift()+'deg, '+ strarr.join()+')';
-                fst.style['-webkit-background-clip'] = 'text';
-                fst.style['-webkit-text-fill-color'] = 'transparent';
+            var cmd = e.charAt(0);
+            var cg = function(cmd, type, where){
+                if(!where){return}
+                var strarr = cmd.substring(1).replace(/([^a-f0-9pxm\%\,\ \#]+)/gi, '').split(",");
+                where.style.background=type+'('+strarr.shift()+'deg, '+ strarr.join()+')';
+                where.style['-webkit-background-clip'] = 'text';
+                where.style['-webkit-text-fill-color'] = 'transparent';
             }
+            var cs = function(cmd, where){
+                if(!where){return}
+                var strarr = cmd.substring(1).replace(/([^a-f0-9\,\ \#]+)/gi, '').split(",");
+                if(!strarr[0] || strarr[0] < 0 || strarr[0] > 15){strarr[0]=0;} // X
+                if(!strarr[1] || strarr[1] < 0 || strarr[1] > 15){strarr[1]=0;} // Y
+                if(!strarr[2] || strarr[2] < 1 || strarr[2] > 25){strarr[2]=5;} // Blur
+                if(!/^\#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(strarr[3])){strarr[3]='#000';} // Color
+                where.style['text-shadow'] = strarr[0]+'px '+strarr[1]+'px '+strarr[2]+'px '+strarr[3];
+            }
+            if(cmd=='a'){cg(e, 'linear-gradient', $('#fsdmn', section))}
+            if(cmd=='A'){cg(e, 'linear-gradient', $('#fslmn', section))}
+            if(cmd=='b'){cg(e, 'linear-gradient-repeat', $('#fsdmn', section))}
+            if(cmd=='B'){cg(e, 'linear-gradient-repeat', $('#fslmn', section))}
+            if(cmd=='c'){cg(e, 'linear-gradient', $('#fsdmt', section))}
+            if(cmd=='C'){cg(e, 'linear-gradient', $('#fslmt', section))}
+            if(cmd=='d'){cg(e, 'linear-gradient-repeat', $('#fsdmt', section))}
+            if(cmd=='D'){cg(e, 'linear-gradient-repeat', $('#fslmt', section))}
+            if(cmd=='e'){cg(e, 'linear-gradient', $('#fsdmm', section))}
+            if(cmd=='E'){cg(e, 'linear-gradient', $('#fslmm', section))}
+            if(cmd=='f'){cg(e, 'linear-gradient-repeat', $('#fsdmm', section))}
+            if(cmd=='F'){cg(e, 'linear-gradient-repeat', $('#fslmm', section))}
+            if(cmd=='g'){cg(e, 'linear-gradient', $('#fsdms', section))}
+            if(cmd=='G'){cg(e, 'linear-gradient', $('#fslms', section))}
+            if(cmd=='h'){cg(e, 'linear-gradient-repeat', $('#fsdms', section))}
+            if(cmd=='H'){cg(e, 'linear-gradient-repeat', $('#fslms', section))}
+            if(cmd=='i'){cg(e, 'linear-gradient', $('#fsdmi', section))}
+            if(cmd=='I'){cg(e, 'linear-gradient', $('#fslmi', section))}
+            if(cmd=='j'){cg(e, 'linear-gradient-repeat', $('#fsdmi', section))}
+            if(cmd=='J'){cg(e, 'linear-gradient-repeat', $('#fslmi', section))}
+            if(cmd=='k'){cs(e, $('#fsdmn', section))}
+            if(cmd=='K'){cs(e, $('#fslmn', section))}
+            if(cmd=='l'){cs(e, $('#fsdmt', section))}
+            if(cmd=='L'){cs(e, $('#fslmt', section))}
+            if(cmd=='m'){cs(e, $('#fsdms', section))}
+            if(cmd=='M'){cs(e, $('#fslms', section))}
+            if(cmd=='n'){cs(e, $('#fsdmi', section))}
+            if(cmd=='N'){cs(e, $('#fslmi', section))}
           });
 
         }catch(e){console.log("FS: Settings",e)}

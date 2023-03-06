@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.2.12
+// @version      0.2.13
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -32,7 +32,7 @@
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.2.12',
+    VERSION: '0.2.13',
     MsApi: '1',
     posts: {},
     threads: [],
@@ -251,7 +251,7 @@
   CSS = {
     init: function() {
       var css;
-      css = ".section-name-sync input[type='text'] {\n  border: 1px solid #CCC;\n  width: 148px;\n  padding: 2px;\n}\n.section-name-sync input[type='button'] {\n  padding: 3px;\n  margin-bottom: 6px;\n}\n.section-name-sync p {\n  margin: 0 0 8px 0;\n}\n.section-name-sync ul {\n  list-style: none;\n  margin: 0;\n  padding: 8px;\n}\n.section-name-sync div label {\n  text-decoration: underline;\n}\n/* Appchan X description fix */\n.section-name-sync .description {\n  display: inline;\n}\n/* ccd0 4chan X clear fix */\n.section-name-sync {\n  clear: both;\n}\n/* Show sync fields in ccd0 4chan X */\n#qr.sync-enabled .persona input {\n  display: inline-block !important;\n}\n.section-name-sync {\n  overflow-y:scroll;\n}\n .nameBlock {\n  white-space: nowrap;}\n";
+      css = ".dialog, #menu {\n  -webkit-text-fill-color:initial}\n.section-name-sync input[type='text'] {\n  border: 1px solid #CCC;\n  width: 148px;\n  padding: 2px;\n}\n.section-name-sync input[type='button'] {\n  padding: 3px;\n  margin-bottom: 6px;\n}\n.section-name-sync p {\n  margin: 0 0 8px 0;\n}\n.section-name-sync ul {\n  list-style: none;\n  margin: 0;\n  padding: 8px;\n}\n.section-name-sync div label {\n  text-decoration: underline;\n}\n/* Appchan X description fix */\n.section-name-sync .description {\n  display: inline;\n}\n/* ccd0 4chan X clear fix */\n.section-name-sync {\n  clear: both;\n}\n/* Show sync fields in ccd0 4chan X */\n#qr.sync-enabled .persona input {\n  display: inline-block !important;\n}\n.section-name-sync {\n  overflow-y:scroll;\n}\n .nameBlock {\n  white-space: nowrap;}\n";
       if (Set['Filter']) {
         css += ".sync-filtered {\n  display: none !important;\n}";
       }
@@ -752,7 +752,7 @@
               var strarr = cmd.substring(1).replace(/([^a-f0-9pxm\%\,\ \#]+)/gi, '').split(",");
                 where.style.background=type+'('+strarr.shift()+'deg, '+ strarr.join()+')';
                 where.style['-webkit-background-clip'] = 'text';
-                where.style['-webkit-text-fill-color'] = 'transparent';
+                where.style['-webkit-text-fill-color'] = 'transparent'; //Stops 4chanx menu from displaying the text properly, fixed in css for .dialog #menu
             }
             var checkshadow = function(cmd){
                 var strarr = cmd.substring(1).replace(/([^a-f0-9\,\ \#]+)/gi, '').split(",");
@@ -761,6 +761,9 @@
                 if(!strarr[2] || strarr[2] < 1 || strarr[2] > 25){strarr[2]=5;} // Blur
                 if(!/^\#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(strarr[3])){strarr[3]='#000';} // Color
                 return strarr[0]+'px '+strarr[1]+'px '+strarr[2]+'px '+strarr[3];
+            }
+            var checkcolor = function(cmd){
+                return cmd.substring(1).replace(/([^a-f0-9\#]+)/gi, '');
             }
             fstr = oinfo.f.split('|');//Format strings are chained with |
             fstr.forEach (function (str, index) {
@@ -775,16 +778,25 @@
               if(cmd === "B"){checkgradient(str, 'repeating-linear-gradient', namespan);}
               if(cmd === "C" && tripspan){checkgradient(str, 'linear-gradient', tripspan);}
               if(cmd === "D" && tripspan){checkgradient(str, 'repeating-linear-gradient', tripspan);}
-              if(cmd === "E"){checkgradient(str, 'linear-gradient', nameRoot);}
-              if(cmd === "F"){checkgradient(str, 'repeating-linear-gradient', nameRoot);}
-              if(cmd === "G"){checkgradient(str, 'linear-gradient', subjectspan);}
-              if(cmd === "H"){checkgradient(str, 'repeating-linear-gradient', subjectspan);}
-              if(cmd === "I"){checkgradient(str, 'linear-gradient', infoRoot);}
-              if(cmd === "J"){checkgradient(str, 'repeating-linear-gradient', infoRoot);}
+              if(cmd === "E" && nameRoot){checkgradient(str, 'linear-gradient', nameRoot);}
+              if(cmd === "F" && nameRoot){checkgradient(str, 'repeating-linear-gradient', nameRoot);}
+              if(cmd === "G" && subjectspan){checkgradient(str, 'linear-gradient', subjectspan);}
+              if(cmd === "H" && subjectspan){checkgradient(str, 'repeating-linear-gradient', subjectspan);}
+              if(cmd === "I" && infoRoot){checkgradient(str, 'linear-gradient', infoRoot);}
+              if(cmd === "J" && infoRoot){checkgradient(str, 'repeating-linear-gradient', infoRoot);}
+
               if(cmd === "K" && namespan){namespan.style['text-shadow'] = checkshadow(str);}
               if(cmd === "L" && tripspan){tripspan.style['text-shadow'] = checkshadow(str);}
               if(cmd === "M" && subjectspan){subjectspan.style['text-shadow'] = checkshadow(str);}
               if(cmd === "N" && infoRoot){infoRoot.style['text-shadow'] = checkshadow(str);}
+
+              if(cmd === "O" && namespan   ){namespan.style['color'] = checkcolor(str);}
+              if(cmd === "P" && tripspan   ){tripspan.style['color'] = checkcolor(str);}
+              if(cmd === "Q" && nameRoot   ){nameRoot.style['color'] = checkcolor(str);}
+              if(cmd === "R" && subjectspan){subjectspan.style['color'] = checkcolor(str);}
+              if(cmd === "S" && infoRoot   ){infoRoot.style['color'] = checkcolor(str);}
+
+              /*if(cmd === "U"){forbidden} */
 
             });
           }catch(e){console.log('FS: Extra colors failed for ', oinfo.p, e);}
@@ -1047,7 +1059,14 @@
       var d = function(e) {
         try{
           var elements = [$('#fsdmn', section), $('#fslmn', section), $('#fsdmt', section), $('#fslmt', section), $('#fsdms', section), $('#fslms', section), $('#fsdmi', section), $('#fslmi', section), $('#fsdmm', section), $('#fslmm', section)];
-          elements.forEach((e,i)=>{e.style['text-shadow']="";e.style.background="";e.style['-webkit-text-fill-color'] =""});
+          elements.forEach((e,i)=>{e.style['text-shadow']="";e.style.background="";e.style['-webkit-text-fill-color'] ="";});
+          $('#fsdms', section).style['color'] ="#b294bb";
+          $('#fsdmn', section).style['color'] ="#c5c8c6";
+          $('#fsdmt', section).style['color'] ="#c5c8c6";
+          $('#fslms', section).style['color'] ="#b294bb";
+          $('#fslmn', section).style['color'] ="#117743";
+          $('#fslmt', section).style['color'] ="#117743";
+          /*TODO: Regenerate/Reset the colors in the thread on style change and trigger a redraw*/
 
           fs.value.split('|').forEach((e,i) => {
             var cmd = e.charAt(0);
@@ -1066,6 +1085,9 @@
                 if(!strarr[2] || strarr[2] < 1 || strarr[2] > 25){strarr[2]=5;} // Blur
                 if(!/^\#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(strarr[3])){strarr[3]='#000';} // Color
                 where.style['text-shadow'] = strarr[0]+'px '+strarr[1]+'px '+strarr[2]+'px '+strarr[3];
+            }
+            var cc = function(cmd, where){
+                where.style['color'] = cmd.substring(1).replace(/([^a-f0-9\#]+)/gi, '');
             }
             if(cmd=='a'){cg(e, 'linear-gradient', $('#fsdmn', section))}
             if(cmd=='A'){cg(e, 'linear-gradient', $('#fslmn', section))}
@@ -1095,6 +1117,19 @@
             if(cmd=='M'){cs(e, $('#fslms', section))}
             if(cmd=='n'){cs(e, $('#fsdmi', section))}
             if(cmd=='N'){cs(e, $('#fslmi', section))}
+
+
+
+            if(cmd=='o'){cc(e, $('#fsdmn', section))}
+            if(cmd=='O'){cc(e, $('#fslmn', section))}
+            if(cmd=='p'){cc(e, $('#fsdmt', section))}
+            if(cmd=='P'){cc(e, $('#fslmt', section))}
+            if(cmd=='q'){cc(e, $('#fsdmm', section))}
+            if(cmd=='Q'){cc(e, $('#fslmm', section))}
+            if(cmd=='r'){cc(e, $('#fsdms', section))}
+            if(cmd=='R'){cc(e, $('#fslms', section))}
+            if(cmd=='s'){cc(e, $('#fsdmi', section))}
+            if(cmd=='S'){cc(e, $('#fslmi', section))}
           });
 
         }catch(e){console.log("FS: Settings",e)}

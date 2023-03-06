@@ -58,6 +58,17 @@ That way hard stops can be used instead of gradients. pixel and em values also w
 b45,#f00 3px,#f80 3px|B45,#800 3px,#840 3px
 Will cause the name to have a striped red orange pattern every 3px in an 45° angle
 
+r#F00|R#800
+dark: color:#ff0000
+light: color:#880000
+Will color the subject red in dark and maroon in light mode
+
+o#0f0|O#000
+Will color the name green in dark and black in light
+
+p#ff0|P#008
+Will color the trip yellow in dark mode and blue in light mode
+
 ```
 The cmd is one letter in upper case for light theme only and lower case for dark theme only
 When using these the user must choose color codes that are readable in both cases.
@@ -83,6 +94,12 @@ K || k => add text shadow to the name
 L || l => add text shadow to the trip
 M || m => add text shadow to the subject
 N || n => add text shadow to the whole top text / info 
+
+O || o => single color for the name
+P || p => single color for the trip
+Q || q => single color for the name + trip
+R || r => single color for the subject
+S || s => single color for the whole top text / info
 
 ```
 If the top text is too much, i'll remove it.

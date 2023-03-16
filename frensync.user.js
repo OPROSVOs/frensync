@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.2.13
+// @version      0.2.14
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -32,7 +32,7 @@
 
   g = {
     NAMESPACE: 'frensync',
-    VERSION: '0.2.13',
+    VERSION: '0.2.14',
     MsApi: '1',
     posts: {},
     threads: [],
@@ -666,7 +666,7 @@
       }
 
 
-      if ((!linfo && !oinfo) || (oinfo && oinfo.ups > ( 6 + Posts.nameByPost.length))) {//forces an update with every new post but doesn't update to death on an stalled thread
+      if (!linfo && !oinfo) {
         return;
       }
 
@@ -832,15 +832,6 @@
           }
         }
       }
-
-      //Remember that we updated the DOM
-      if(!oinfo.ups && Posts.nameByPost[oinfo.p]){
-          Posts.nameByPost[oinfo.p].ups = 1 ;
-      }
-      if(Posts.nameByPost[oinfo.p].ups != null){
-        Posts.nameByPost[oinfo.p].ups++;
-      }
-
 
       return $.event('FSPostUpdated');
 

@@ -58,7 +58,7 @@ other forks of 4chanX
 
 ### Tripcode related:
 [Merikens Tripcode Engine v3](https://github.com/meriken/merikens-tripcode-engine-v3) is the fastest way of using the gpu to find partial tripcodes   
-**Tripcode Explorer**, Offline. The ancient japanese implementation for finding trips, had lots of infos
+**Tripcode Explorer**, Offline. The ancient japanese implementation for finding trips, had lots of infos  
 [Tripcode Tester](https://nonegiven.github.io/tripcode) for testing a tripcode  
 
 ### Thanks

@@ -16,16 +16,27 @@ TL;DR: Have a userscript extension, disable old scripts, add adblock exceptions,
 
 
 ## Tests, last working version:
-* Firefox 122 - OK
-* Chrome 121 - OK
-* Yandex 22.3.4 - OK
-* Firefox mobile 66 - OK
+* Firefox 127 - OK
+* Brave 1.68.141 (Chromium 127) - OK
+* Opera GX 112 - OK, use the Chrome web store
 * Safari 11.2 - OK
-* ViolentMonkey 2.15 - OK
-* TamperMonkey 5.0.1 - OK (causes permission popups)
-* GreaseMonkey  4.12.0 - OK (differences in API but working)
+* Yandex 22.3.4 - OK
+* Chrome, Chromium 129 - Issues, *ViolentMonkey broken due to ManifestV3, requires to run extensions in dev mode
+* Firefox mobile 66 - OK
+* ViolentMonkey 2.20 - OK* 
+* TamperMonkey 5.2.3 - OK, causes permission popunders that are required to work
+* GreaseMonkey  4.12.0 - OK
 * 4chanX 1.14.22 - OK
 * AppchanX - Broken (Captcha broken, no color support)
+
+## Note for Chrome users / TamperMonkey users regarding Manifest V3
+ViolentMonkey is delisted like uBlock for not being "best practice" and TamperMonkey is the only one that works on Chrome as in August 2024.
+After installing TamperMonkey, enable the dev mode for extensions in order to run TamperMonkey. Watch out for permissions after installing.
+
+Most userscripts just use @include (instead of @match) in the header but eslint warns that it may be obsolete with v3.
+
+## Note for Opera GX users from the Violentmonkey devs:
+"Opera users please install from [Chrome Web Store](https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag) because the Opera team no longer reviews the extension because they think Violentmonkey is too complicated and they don't have time to review it. :(" 
 
 ## Todos:
 * cleanup extended color code

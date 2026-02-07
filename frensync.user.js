@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         frensync
-// @version      0.2.14
+// @version      0.2.15
 // @minGMVer     1.14
 // @minFFVer     26
 // @namespace    frensync
@@ -460,14 +460,14 @@
         try{o = JSON.parse(sl)}catch(e){console.log("FS: crtitcal error: could not read the serverlist"); o = JSON.parse(MasterServer.saneDefaults(1)); }
         MasterServer.data = o;
         */
-        MasterServer.data = JSON.parse('{"server":[{"namesync.net":{"name":"namesync original","sp":true,"qp":true,"prio":["t"]}},{"m8q16hakamiuv8ch.myfritz.net":{"name":"frensync backup","sp":true,"qp":true}},{"nsredux.com":{"name":"Namesync Redux","sp":true,"qp":true}}],"revisit":86400,"api":1}');
+        MasterServer.data = JSON.parse('{"server":[{"namesync.net":{"name":"namesync original","sp":true,"qp":true,"prio":["t"]}},{"k2mef53e0v09lag0.myfritz.net":{"name":"Frensync","sp":true,"qp":true}},{"m8q16hakamiuv8ch.myfritz.net":{"name":"Frensync Backup","sp":true,"qp":true}}],"revisit":86400,"api":1}');
         MasterServer.data.done = true;
       },
       saneDefaults: function(override){
         /*var srv = $.get("Serverlist");
         if(typeof srv == undefined || srv == null || srv.length < 1 || override == 1 ){
           console.log("FS: Fallback to defaults");
-          var defaults = '{"server":[{"namesync.net":{"sp":true,"qp":true}},{"nsredux.net":{"sp":true,"qp":true}},{"m8q16hakamiuv8ch.myfritz.net":{"sp":true,"qp":true}}],"revisit":43200}';
+          var defaults = '{"server":[{"namesync.net":{"sp":true,"qp":true}},{"m8q16hakamiuv8ch.myfritz.net":{"sp":true,"qp":true}},{"k2mef53e0v09lag0.myfritz.net":{"sp":true,"qp":true}}],"revisit":43200}';
           $.set("Serverlist", defaults);
           $.set("Serverlist-last-check", "2");
           return defaults;
@@ -676,7 +676,7 @@
       emailspan = $('.useremail', this.nodes.info);
 
       if(Set['Show origin'] && oinfo != null) {
-          subject ="[" + ((oinfo.m8q)?"✔️":"❌")+((oinfo.nsr)?"✔️":"❌")+((oinfo.nam)?"✔️":"❌") + "]"+ (subject||"") ;
+          subject ="[" + ((oinfo.k2m)?"✔️":"❌")+((oinfo.nsr)?"✔️":"❌")+((oinfo.nam)?"✔️":"❌") + "]"+ (subject||"") ;
       }
       //mark thread
       if(Set['Mark OP'] && oinfo != null && oinfo.m === true) {
@@ -890,7 +890,7 @@
     },
     open: function(section) {
       var check, checked, field, i, istrue, j, len, len1, ref, ref1, ref2, setting, stored, text, val;
-      //section.innerHTML = "<fieldset>\n  	<legend>\n    		<label><input type=checkbox name='Persona Fields' " + ($.get('Persona Fields') === 'true' ? 'checked' : '') + ">Persona</label>\n  	</legend>\n  <p>Share these fields instead of the 4chan X quick reply fields.</p>\n  <div>\n    	<input type=text name=Name placeholder=Name>\n    	<input type=text name=Email placeholder=Email>\n    	<input type=text name=Subject placeholder=Subject>\n  </div>\n</fieldset>\n<fieldset>\n  	<legend>\n    <label><input type=checkbox name=Filter " + ($.get('Filter') === 'true' ? 'checked' : '') + ">Filter</label>\n  	</legend>\n  <p><code>^(?!Anonymous$)</code> to filter all names <code>!tripcode|!tripcode</code> to filter multiple tripcodes. Only applies to sync posts.</p>\n  <div>\n    	<input type=text name=FilterNames placeholder=Names>\n    	<input type=text name=FilterTripcodes placeholder=Tripcodes>\n    	<input type=text name=FilterEmails placeholder=Email>\n    	<input type=text name=FilterSubjects placeholder=Subjects>\n  </div>\n</fieldset>\n<fieldset>\n  <legend>Advanced</legend>\n  <div>\n    	<input id=syncClear type=button value='Clear my sync history' title='Clear your sync history from the server'>\n    	Sync Delay: <input type=number name=Delay min=0 step=100 placeholder=300 title='Delay before synchronising after a thread or index update'> ms\n   	</div>\n</fieldset>\n<fieldset>\n  	<legend>About</legend>\n  	<div>4chanX FrenSync v" + g.VERSION + "</div>\n  	<div>\n    		<a href='https://m8q16hakamiuv8ch.myfritz.net' target=_blank>Website</a> |\n    		<a href='https://github.com/OPROSVOs/frensync/wiki/Support' target=_blank>Support</a> |\n    		<a href='https://github.com/OPROSVOs/frensync/license' target=_blank>License</a> |\n      		<a href='https://github.com/OPROSVOs/frensync/issues/new' target=_blank>Issues</a>\n  	</div>\n<p></p>	<div>Based on 4chan X Name Sync v4.9.3</div>\n  	<div>\n    <a href='http://milkytiptoe.github.io/Name-Sync/' target=_blank>Website</a> |\n    		<a href='https://github.com/milkytiptoe/Name-Sync/wiki/Support' target=_blank>Support</a> |\n    		<a href='https://raw.githubusercontent.com/milkytiptoe/Name-Sync/master/license' target=_blank>License</a> |\n    		<a href='https://raw.githubusercontent.com/milkytiptoe/Name-Sync/master/changelog' target=_blank>Changelog</a> |\n    		<a href='https://github.com/milkytiptoe/Name-Sync/issues/new' target=_blank>Issues</a>\n  	</div>\n</fieldset>";
+      //section.innerHTML = "<fieldset>\n  	<legend>\n    		<label><input type=checkbox name='Persona Fields' " + ($.get('Persona Fields') === 'true' ? 'checked' : '') + ">Persona</label>\n  	</legend>\n  <p>Share these fields instead of the 4chan X quick reply fields.</p>\n  <div>\n    	<input type=text name=Name placeholder=Name>\n    	<input type=text name=Email placeholder=Email>\n    	<input type=text name=Subject placeholder=Subject>\n  </div>\n</fieldset>\n<fieldset>\n  	<legend>\n    <label><input type=checkbox name=Filter " + ($.get('Filter') === 'true' ? 'checked' : '') + ">Filter</label>\n  	</legend>\n  <p><code>^(?!Anonymous$)</code> to filter all names <code>!tripcode|!tripcode</code> to filter multiple tripcodes. Only applies to sync posts.</p>\n  <div>\n    	<input type=text name=FilterNames placeholder=Names>\n    	<input type=text name=FilterTripcodes placeholder=Tripcodes>\n    	<input type=text name=FilterEmails placeholder=Email>\n    	<input type=text name=FilterSubjects placeholder=Subjects>\n  </div>\n</fieldset>\n<fieldset>\n  <legend>Advanced</legend>\n  <div>\n    	<input id=syncClear type=button value='Clear my sync history' title='Clear your sync history from the server'>\n    	Sync Delay: <input type=number name=Delay min=0 step=100 placeholder=300 title='Delay before synchronising after a thread or index update'> ms\n   	</div>\n</fieldset>\n<fieldset>\n  	<legend>About</legend>\n  	<div>4chanX FrenSync v" + g.VERSION + "</div>\n  	<div>\n    		<a href='https://k2mef53e0v09lag0.myfritz.net' target=_blank>Website</a> |\n    		<a href='https://github.com/OPROSVOs/frensync/wiki/Support' target=_blank>Support</a> |\n    		<a href='https://github.com/OPROSVOs/frensync/license' target=_blank>License</a> |\n      		<a href='https://github.com/OPROSVOs/frensync/issues/new' target=_blank>Issues</a>\n  	</div>\n<p></p>	<div>Based on 4chan X Name Sync v4.9.3</div>\n  	<div>\n    <a href='http://milkytiptoe.github.io/Name-Sync/' target=_blank>Website</a> |\n    		<a href='https://github.com/milkytiptoe/Name-Sync/wiki/Support' target=_blank>Support</a> |\n    		<a href='https://raw.githubusercontent.com/milkytiptoe/Name-Sync/master/license' target=_blank>License</a> |\n    		<a href='https://raw.githubusercontent.com/milkytiptoe/Name-Sync/master/changelog' target=_blank>Changelog</a> |\n    		<a href='https://github.com/milkytiptoe/Name-Sync/issues/new' target=_blank>Issues</a>\n  	</div>\n</fieldset>";
       section.innerHTML = `<fieldset>
   	<legend>
     		<label><input type=checkbox name='Persona Fields' ` + ($.get('Persona Fields') === 'true' ? 'checked' : '') + `>Persona</label>
@@ -975,7 +975,7 @@
   	<legend>About</legend>
   	<div>4chanX FrenSync v `+ g.VERSION + `</div>
   	<div>
-    		<a href='https://m8q16hakamiuv8ch.myfritz.net' target=_blank>Website</a> |
+    		<a href='https://k2mef53e0v09lag0.myfritz.net' target=_blank>Website</a> |
     		<a href='https://github.com/OPROSVOs/frensync/wiki/Support' target=_blank>Support</a> |
     		<a href='https://github.com/OPROSVOs/frensync/license' target=_blank>License</a> |
       		<a href='https://github.com/OPROSVOs/frensync/issues/new' target=_blank>Issues</a>
@@ -1401,7 +1401,7 @@
       } else {
         return;
       }
-	  this.NSserver = (parseInt($.get('NSserver'))) || 'namesync.net,nsredux.com,m8q16hakamiuv8ch.myfritz.net';
+	  this.NSserver = (parseInt($.get('NSserver'))) || 'namesync.net,m8q16hakamiuv8ch.myfritz.net,k2mef53e0v09lag0.myfritz.net';
 	  this.NSserver.split(',').forEach(function(server){
 		  return $.ajax(server, 'rm', 'POST', '',
       function() { //onload
